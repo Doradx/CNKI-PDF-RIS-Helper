@@ -61,10 +61,10 @@ function updateRowItems() {
         if (row.getAttribute('ris')) {
             continue;
         } else {
-            var fileName = row.getElementsByClassName('seq')[0].firstElementChild.value;
-            var dbName = fileName.split('!')[0];
-            var fileId = fileName.split('!')[1];
-            var title = row.getElementsByClassName('name')[0].firstElementChild.innerHTML.replace(/<[^>]*>|/g, "").replace(/(^\s+)|(\s+$)/g, "");
+            let fileName = row.getElementsByClassName('seq')[0].firstElementChild.value;
+            let dbName = fileName.split('!')[0];
+            let fileId = fileName.split('!')[1];
+            let title = row.getElementsByClassName('name')[0].firstElementChild.innerHTML.replace(/<[^>]*>|/g, "").replace(/(^\s+)|(\s+$)/g, "");
             // console.log(title);
             var operats = row.getElementsByClassName('operat')[0];
             // replace the download with pdf
@@ -84,12 +84,11 @@ function updateRowItems() {
                 exportRis.title = '导出RIS';
                 exportRis.removeAttribute('target');
                 exportRis.removeAttribute('href');
-                exportRis.onclick = function () {
+                exportRis.onclick = function(){
                     console.log('RIS Export: ' + title + ', ' + fileId + ', ' + dbName);
                     downloadByFilename(fileId, dbName, title);
                 }
             }
-            // console.log(fileId);
             row.setAttribute('ris', true);
         }
     }
