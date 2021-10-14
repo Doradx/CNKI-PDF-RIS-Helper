@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn
-// @version      0.5.3
+// @version      0.5.4
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote!
 // @author       Dorad
 // @license      MIT License
