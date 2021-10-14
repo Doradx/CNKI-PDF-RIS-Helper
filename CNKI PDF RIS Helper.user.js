@@ -4,7 +4,7 @@
 // @version      0.5.3
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote!
 // @author       Dorad
-// @copyright    MIT
+// @license      MIT License
 // @include      https://kns.cnki.net/kns8/defaultresult/index
 // @include      https://*.cnki.net/kcms/detail*
 // @include      https://chn.oversea.cnki.net/kns/defaultresult/index
