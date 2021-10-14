@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn
-// @version      0.4.0
-// @description  1.支持学位论文PDF导出; 2.支持在论文详情页直接导出RIS, 一键导入Endnote!
+// @version      0.5.0
+// @description  支持在论文详情页直接导出RIS, 一键导入Endnote!
 // @author       Dorad
 // @copyright    MIT
 // @include      https://kns.cnki.net/kns8/defaultresult/index
 // @include      https://*.cnki.net/kcms/detail*
+// @include      https://chn.oversea.cnki.net/kns/defaultresult/index
 // @include      https://chn.oversea.cnki.net/KCMS/detail/*
 // @run-at       document-idle
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
@@ -35,7 +36,6 @@
             downloadByFilename(fileId, dbName, title);
         }
         operateBtns.append(risExportBtn);
-        pdfDownload();
     } else {
         // 搜索页
         var wrapper = document.getElementsByClassName('wrapper')[0];
@@ -51,6 +51,7 @@
     }
 })();
 
+// 更新搜索页，每一行的【下载PDF】和【导出RIS】
 function updateRowItems() {
     if (document.getElementsByClassName('result-table-list').length == 0) {
         return;
@@ -127,63 +128,4 @@ function downloadByFilename(fileId, dbName, name) {
             }
         }
     });
-}
-
-function pdfDownload() {
-    var allLis, thisLi, newLi, aPDF, bPDF, allLinks, thisLink, pageType, pfType, myurl, i;
-    pageType = true;
-    pfType = true;
-    myurl = window.location.href;
-
-    allLinks = document.evaluate('//a[@href]', document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-
-    allLis = document.evaluate("//li[@class]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-
-    if (myurl.indexOf("detail.aspx") != -1) {
-        pageType = false;
-    } //false 为详情页面
-    if (document.title.indexOf(" - 中国知网") != -1) {
-        pfType = false;
-    } //false 为新平台
-    if ((pfType === true) & (pageType === false)) {
-        for (i = 0; i < allLis.snapshotLength; i++) {
-            thisLi = allLis.snapshotItem(i);
-            if (thisLi.getAttribute("class").indexOf("readol") != -1) {
-                newLi = document.createElement('li');
-                newLi.setAttribute("class", "pdf");
-                aPDF = '<a target="_blank" href="' + thisLi.firstChild.href.replace("&dflag=readonline", "&dflag=pdfdown") + '">PDF下载</a>';
-                newLi.innerHTML = aPDF;
-                thisLi.parentNode.insertBefore(newLi, thisLi.nextSibling);
-            }
-        }
-    }
-
-    if ((pfType === false) & (pageType === false)) {
-        for (i = 0; i < allLinks.snapshotLength; i++) {
-            thisLink = allLinks.snapshotItem(i);
-            if (thisLink.href && thisLink.href.indexOf("download.aspx?filename=") != -1 && thisLink.innerHTML.indexOf("整本") != -1) {
-                thisLink.innerHTML = thisLink.innerHTML.replace("整本", "CAJ");
-                bPDF = thisLink.href;
-            }
-            if (thisLink.href && thisLink.href.indexOf("download.aspx?filename=") != -1 && thisLink.innerHTML.indexOf("分页") != -1) {
-                thisLink.innerHTML = thisLink.innerHTML.replace("分页", "PDF");
-                thisLink.href = bPDF.replace("nhdown", "pdfdown");
-            }
-        }
-    }
-
-    if (pageType === true) {
-        for (i = 0; i < allLinks.snapshotLength; i++) {
-            thisLink = allLinks.snapshotItem(i);
-            if (thisLink.href && thisLink.href.indexOf("download.aspx?filename=") != -1 && thisLink.href.indexOf("&dflag") == -1) {
-                thisLink.href = thisLink.href + "&dflag=pdfdown";
-            }
-            if (thisLink.href && thisLink.href.indexOf("download.aspx?filename=") != -1 && thisLink.href.indexOf("&dflag=nhdown") != -1) {
-                thisLink.href = thisLink.href.replace("nhdown", "pdfdown");
-            }
-            if (thisLink.href && thisLink.href.indexOf("download.aspx?filename=") != -1 && thisLink.href.indexOf("&dflag=pdfdown") != -1 && (thisLink.href.indexOf("=CMFD") != -1 || thisLink.href.indexOf("=CDFD") != -1)) {
-                thisLink.href = thisLink.href.replace("pdfdown", "nhdown");
-            }
-        }
-    }
 }
