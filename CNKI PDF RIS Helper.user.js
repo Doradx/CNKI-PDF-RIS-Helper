@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn
-// @version      0.5.6
+// @version      0.5.7
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
@@ -97,8 +97,8 @@ function updateRowItems() {
     }
 }
 
-// type can be EndnNote or Refworks
-function downloadByFilename(fileId, dbName, name, type='EndnNote') {
+// type can be EndNote or Refworks
+function downloadByFilename(fileId, dbName, name, type='EndNote') {
     GM_xmlhttpRequest({
         method: "POST",
         url: "https://kns.cnki.net/KNS8/manage/ShowExport",
