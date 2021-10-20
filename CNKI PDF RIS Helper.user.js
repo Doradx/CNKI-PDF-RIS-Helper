@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn
-// @version      0.6.0
+// @version      0.6.1
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
@@ -19,7 +19,7 @@
     var site = window.location.href.toString();
     if (site.indexOf('kcms/detail') != -1 || site.indexOf('KCMS/detail') != -1 ) {
         // 详情页
-        var operateBtns = document.getElementById('DownLoadParts').getElementsByClassName('operate-btn')[0];
+        var butttonBoxs = document.getElementsByClassName('operate-btn');
         /*
          * RIS Export
          */
@@ -31,11 +31,18 @@
         risExportBtn.setAttribute("class", "btn-dlpdf");
         risExportBtn.innerHTML = '<a><i></i>导出RIS</a>';
         risExportBtn.firstElementChild.style.backgroundColor = "#2f022e";
-        risExportBtn.onclick = function () {
+
+        var risExportBtnFixed = risExportBtn.cloneNode(true)
+        var exportRisEvent = function () {
             console.log('RIS Export: ' + title + ', ' + fileId + ', ' + dbName);
             downloadByFilename(fileId, dbName, title);
         }
-        operateBtns.append(risExportBtn);
+        risExportBtn.onclick = exportRisEvent
+        risExportBtnFixed.onclick = exportRisEvent
+        
+        // append the ris button to the button list.
+        butttonBoxs[0].append(risExportBtn);
+        butttonBoxs[1].append(risExportBtnFixed);
     } else {
         // 搜索页
         var wrapper = document.getElementsByClassName('wrapper')[0];
