@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.7.0
+// @version      0.7.1
 // @description  download ris and associeted pdf for SCI.
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -78,6 +78,8 @@
 // @include https://www.semanticscholar.org/paper/*
 // @include https://www.researchgate.net/publication/*
 // @include https://www.earthdoc.org/content/papers/*
+// @include https://era.library.ualberta.ca/items*
+// @include http://www.gcdz.org/en/article/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -127,56 +129,52 @@ $(document).ready(function () {
 
 function generateTheButton(ris, metas) {
     const year = new Date().getFullYear();
-    var html = `<a id="risDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;">
-    RIS
-    </a>
-    <a href="https://blog.cuger.cn" style="width:100%; height:20px; display: inline-block; line-height:20px; text-align: center; font-size:8px;background:#0C344E;color:white;padding:0;margin:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a>
-    `;
-    // create the button
-    var sheet = document.createElement('div');
-    sheet.innerHTML = html;
-    sheet.style = `
-    -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    line-height: 1.42857143;
-    font-family: "Arial","微软雅黑","Helvetica,sans-serif","Microsoft YaHei";
-    font-size: 16px;
-    box-sizing: border-box;
-    border-radius: 10px;
-    margin: 0;
-    padding: 0;
-    width: 100px;
-    height: 80px;
-    cursor: pointer;
-    position: fixed;
-    bottom: 10%;
-    right: 20px;
-    z-index: 2147483647;
-    background: #1B2821;
-    visibility: visible;
-    display:inline-block;
-    justify-content:center;
-    align-items:bottom;
-    `
-    sheet.id = 'risBox'
-    document.body.appendChild(sheet);
+    let sheet = $(`
+    <div id="risBox">
+    <a id="risDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;">RIS</a>
+    <a href="https://blog.cuger.cn" style="width:100%; height:20px; display: inline-block; line-height:20px; text-align: center; font-size:8px;background:#0C344E;color:white;padding:0;margin:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a></div>`)
+    var css = {
+        'line-height': '1.42857143',
+        'font-family': '"Arial","微软雅黑","Helvetica,sans-serif","Microsoft YaHei"',
+        'font-size': '16px',
+        'box-sizing': 'border-box',
+        'border-radius': '10px',
+        'margin': '0',
+        'padding': '0',
+        'width': '100px',
+        'height': '80px',
+        'cursor': 'pointer',
+        'position': 'fixed',
+        'bottom': '10%',
+        'right': '20px',
+        'z-index': '2147483647',
+        'background': '#1B2821',
+        'visibility': 'visible',
+        'display': 'inline-block',
+        'justify-content': 'center',
+        'align-items': 'bottom',
+    }
+    $('body').append(sheet);
+    $('div#risBox').css(css);
     // generate the Blob
     const blob = new Blob([ris], { type: "octet/stream" });
     const url = URL.createObjectURL(blob);
+    var downloadFilename = metas.hasOwnProperty('title') ? metas.title.replace("/", "@") + ".ris" : "download.ris";
     $("#risDownload").attr("href", url);
-    $("#risDownload").attr("download", metas.title.replace("/", "@") + ".ris");
+    $("#risDownload").attr("download", downloadFilename);
     /**
      * set the style.
      */
-    if (!metas.doi || ris.length == 0) {
+    if(metas.hasOwnProperty('pdf') && metas.pdf.length && metas.hasOwnProperty('doi') && metas.doi.length && ris.length){
+        $("#risDownload").text("PDF");
+        $('#risBox').css("background", "#6ECB63");
+    }else if(ris.length && metas.hasOwnProperty('doi') && metas.doi.length){
+        $("#risDownload").text("RIS");
+        $('#risBox').css("background", "#118ab2");
+    }else{
         $("#risDownload").attr("href", "javascript:void(0);");
         $("#risDownload").text("NONE");
-        $('#risBox').css("background", "#1B2821");
-    } else {
-        if (metas.pdf) {
-            $("#risDownload").text("PDF");
-            $('#risBox').css("background", "#56F569");
-        }
+        $('#risBox').css("background", "#6E7582");
     }
     return sheet;
 }
@@ -204,7 +202,10 @@ function getMeta() {
         }
     }
     // check doi using regrex
-    if (metas.hasOwnProperty('doi') && metas.doi.match(/10\.[^\s\/]+\/[^\s]+/)) {
+    if(metas.hasOwnProperty('doi') && metas.doi.match(/10\.[^\s\/]+\/[^\s]+/).length == 0){
+        delete metas.doi;
+    }
+    if (metas.hasOwnProperty('doi') && metas.doi.match(/10\.[^\s\/]+\/[^\s]+/).length) {
         metas.doi = metas.doi.match(/10\.[^\s\/]+\/[^\s]+/)[0];
     }
     return metas;
@@ -222,14 +223,14 @@ function getRefmanBasedOnMetas(metas) {
             },
             onload: function (res) {
                 if (res.status !== 200) {
-                    console.log('Failed to get the refman information based on doi. DOI: ' + metas.doi + '. HTTP Status Code: ' + res.status);
+                    console.log('Failed to get the refman information based on doi. DOI: ' + metas.doi, '. HTTP Status Code: ',res.status);
                     resolve("");
                 }
                 let ris = res.responseText;
                 resolve(ris);
             },
             onerror: function (err) {
-                console.log('Failed to get the refman information based on doi. DOI: ' + metas.doi + '. ERROR: ' + err);
+                console.log('Failed to get the refman information based on doi. DOI: ' + metas.doi, err);
                 resolve("");
             }
         });
