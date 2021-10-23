@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.5.7
+// @version      0.6.0
 // @description  download ris and associeted pdf for SCI.
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -68,6 +68,11 @@
 // @include https://ascopubs.org/doi/*
 // @include https://www.jto.org/article/*
 // @include https://www.jci.org/articles/*
+// @include https://pubmed.ncbi.nlm.nih.gov/*
+// @include https://www.spiedigitallibrary.org/conference-*
+// @include https://www.ingentaconnect.com/content/*
+// @include https://www.taylorfrancis.com/*
+// @include https://www.science.org/doi/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -101,10 +106,10 @@ $(document).ready(function () {
 
 function generateTheButton(ris, metas) {
     const year = new Date().getFullYear();
-    var html = `<a id="risDownload" style="width:100px; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white">
+    var html = `<a id="risDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;">
     RIS
     </a>
-    <a href="https://blog.cuger.cn" style="width:96px; height:20px; display: inline-block; line-height:20px; text-align: center; font-size:8px;background:#0C344E;color:white;border-bottom-left-radius:10px;border-bottom-right-radius:10px">Dorad © ${year}</a>
+    <a href="https://blog.cuger.cn" style="width:100%; height:20px; display: inline-block; line-height:20px; text-align: center; font-size:8px;background:#0C344E;color:white;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a>
     `;
     // create the button
     var sheet = document.createElement('div');
@@ -125,7 +130,7 @@ function generateTheButton(ris, metas) {
     position: fixed;
     bottom: 10%;
     right: 20px;
-    z-index: 5000;
+    z-index: 2147483647;
     background: #1B2821;
     visibility: visible;
     display:inline-block;
@@ -159,12 +164,12 @@ function generateTheButton(ris, metas) {
 // load meta
 async function getMeta() {
     const metaDict = {
-        title: ["dc.title", "dc.Title", "citation_title", "wkhealth_title"],
-        doi: ["citation_doi", "dc.identifier", "dc.Identifier", "dc.Source"],
+        title: ["dc.title", "dc.Title", "DC.title","citation_title", "wkhealth_title"],
+        doi: ["citation_doi", "dc.identifier", "dc.Identifier", "DC.identifier","dc.Source"],
         pdf: ["citation_pdf_url", "wkhealth_pdf_url"],
         abstract: ["dc.description", "dc.Description", "og:description", "og:Description", "citation_abstract"]
     }
-    let metas = journalMetasAdaptor();
+    let metas = await journalMetasAdaptor();
     // search for generic fields
     for (var key in metaDict) {
         if (metas.hasOwnProperty(key)) {
@@ -181,9 +186,8 @@ async function getMeta() {
     if (metas.hasOwnProperty('doi') && metas.doi.match(/10\.[^\s\/]+\/[^\s]+/)) {
         metas.doi = metas.doi.match(/10\.[^\s\/]+\/[^\s]+/)[0];
     }
-    console.log(metas);
     // if there is no pdf url in the metas, check the sci-hub.
-    if (!metas.hasOwnProperty('pdf') || metas.pdf.slice(-3) !== 'pdf') {
+    if (!metas.hasOwnProperty('pdf') || metas.pdf.slice(-4) !== '.pdf') {
         let pdfUrlFromSciHub = await getPdfLinkFromSciHubBasedOnDoi(metas.doi);
         metas['pdf'] = pdfUrlFromSciHub;
     }
@@ -202,7 +206,8 @@ function getRefmanBasedOnMetas(metas) {
             },
             onload: function (res) {
                 if (res.status !== 200) {
-                    reject(res.status)
+                    console.log('Failed to get the refman information based on doi. DOI: ' + metas.doi + '. HTTP Status Code: ' + res.status);
+                    resolve("");
                 }
                 let ris = res.responseText;
                 // deal with abstract
@@ -261,12 +266,60 @@ function getPdfLinkFromSciHubBasedOnDoi(doi) {
     })
 }
 
+// [FAILED] get pdf url from science direct.
+// can't get the cookies which are marked as HTTP Only.
+function getPdfUrlForScienceDirect(){
+    // get cookie from request.
+    const articleConfig = $.parseJSON($('script[type="application/json"][data-iso-key="_0"]').text()).article;
+    const urlMeta = articleConfig.pdfDownload.urlMetadata;
+    console.log('start get pdf url from sciencedirect.');
+    return new Promise((resolve, reject) => {
+        GM.xmlHttpRequest({
+            url: `https://www.sciencedirect.com/${urlMeta.path}/${urlMeta.pii}${urlMeta.pdfExtension}?md5=${urlMeta.queryParams.md5}&pid=${urlMeta.queryParams.pid}`,
+            method: "GET",
+            headers: {
+                'authority': 'www.sciencedirect.com',
+                'pragma': 'no-cache',
+                'cache-control': 'no-cache',
+                'sec-ch-ua': '"Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"',
+                'sec-ch-ua-mobile': '?0',
+                'dnt': '1',
+                'upgrade-insecure-requests': '1',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'sec-fetch-site': 'none',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-user': '?1',
+                'sec-fetch-dest': 'document',
+                'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
+                'cookie': document.cookie
+            },
+            timeout:2000,
+            onload: function (res) {
+                if (res.status !== 200) {
+                    console.log('Failed to get the PDF from ScienceDirect. HTTP Status Code: ' + res.status);
+                    resolve("");
+                }
+                let html = $.parseHTML(res.responseText);
+                if($('div#redirect-message p',html).length){
+                    resolve($('div#redirect-message p',html).attr("href"));
+                }
+                console.log('None URL in the response from ScienceDirect. ', res);
+                resolve("");
+            },
+            onerror: function (err) {
+                console.log('Failed to get the pdf from ScienceDirect. ERROR: ',err);
+                resolve("");
+            }
+        });
+    });
+}
 
 /**
  * custom journal metas adaptor
  */
 
-function journalMetasAdaptor() {
+async function journalMetasAdaptor() {
     let metas = {};
     /**
      * all the non standard journal
@@ -278,11 +331,12 @@ function journalMetasAdaptor() {
             metas.title = $('h1.document-title span').text();
             break;
         case 'www.tandfonline.com':
+        case 'dl.acm.org':
             metas.doi = $('meta[name="dc.Identifier"][scheme="doi"]').attr("content");
             metas.abstract = $('div.abstractInFull p').text();
             break;
         case 'www.sciencedirect.com':
-            metas.abstract = $('div[id^="aep-abstract-sec-"],[id^="abssec"] p').text()
+            metas.abstract = $('div[id^="aep-abstract-sec-"],[id^="abssec"],[id="as0005"] p').text();
             break;
         case 'pubs.acs.org':
             metas.abstract = $('meta[property="og:description"]').attr("content");
@@ -308,6 +362,15 @@ function journalMetasAdaptor() {
             break;
         case 'direct.mit.edu':
             metas.abstract = $('section.abstract p').text();
+            break;
+        case 'academic.oup.com':
+            metas.doi = $('span.article-link-citation a').attr("href");
+            break;
+        case 'www.ingentaconnect.com':
+            metas.abstract = $('div#Abst').text();
+            break;
+        case 'www.science.org':
+            metas.doi = $('meta[name="dc.Relation"]').attr("content");
             break;
         default:
     }
