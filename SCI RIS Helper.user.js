@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.6.0
+// @version      0.6.1
 // @description  download ris and associeted pdf for SCI.
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -73,6 +73,8 @@
 // @include https://www.ingentaconnect.com/content/*
 // @include https://www.taylorfrancis.com/*
 // @include https://www.science.org/doi/*
+// @include https://www.scinapse.io/papers/*
+// @include https://www.semanticscholar.org/paper/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -106,10 +108,10 @@ $(document).ready(function () {
 
 function generateTheButton(ris, metas) {
     const year = new Date().getFullYear();
-    var html = `<a id="risDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;">
+    var html = `<a id="risDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;">
     RIS
     </a>
-    <a href="https://blog.cuger.cn" style="width:100%; height:20px; display: inline-block; line-height:20px; text-align: center; font-size:8px;background:#0C344E;color:white;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a>
+    <a href="https://blog.cuger.cn" style="width:100%; height:20px; display: inline-block; line-height:20px; text-align: center; font-size:8px;background:#0C344E;color:white;padding:0;margin:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a>
     `;
     // create the button
     var sheet = document.createElement('div');
@@ -187,7 +189,7 @@ async function getMeta() {
         metas.doi = metas.doi.match(/10\.[^\s\/]+\/[^\s]+/)[0];
     }
     // if there is no pdf url in the metas, check the sci-hub.
-    if (!metas.hasOwnProperty('pdf') || metas.pdf.slice(-4) !== '.pdf') {
+    if (!metas.hasOwnProperty('pdf') || metas.pdf.slice(-4) !== '.pdf' || window.location.href.indexOf("chapter")>0) {
         let pdfUrlFromSciHub = await getPdfLinkFromSciHubBasedOnDoi(metas.doi);
         metas['pdf'] = pdfUrlFromSciHub;
     }
@@ -332,7 +334,8 @@ async function journalMetasAdaptor() {
             break;
         case 'www.tandfonline.com':
         case 'dl.acm.org':
-            metas.doi = $('meta[name="dc.Identifier"][scheme="doi"]').attr("content");
+            metas.doi = $('meta[name="dc.Identifier"][scheme="doi"],meta[property="og:url"]').attr("content");
+            metas.title = $('h1.citation__title').text();
             metas.abstract = $('div.abstractInFull p').text();
             break;
         case 'www.sciencedirect.com':
@@ -371,6 +374,9 @@ async function journalMetasAdaptor() {
             break;
         case 'www.science.org':
             metas.doi = $('meta[name="dc.Relation"]').attr("content");
+            break;
+        case 'www.semanticscholar.org':
+            metas.doi = $('meta[name="citation_pdf_url"]').attr("content");
             break;
         default:
     }
