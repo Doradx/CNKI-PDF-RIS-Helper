@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.5.6
+// @version      0.5.7
 // @description  download ris and associeted pdf for SCI.
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -101,10 +101,10 @@ $(document).ready(function () {
 
 function generateTheButton(ris, metas) {
     const year = new Date().getFullYear();
-    var html = `<a id="risDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white">
+    var html = `<a id="risDownload" style="width:100px; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white">
     RIS
     </a>
-    <a href="https://blog.cuger.cn" style="width:100%; height:20px; display: inline-block; line-height:20px; text-align: center; font-size:8px;background:#0C344E;color:white;border-bottom-left-radius:10px;border-bottom-right-radius:10px">Dorad © ${year}</a>
+    <a href="https://blog.cuger.cn" style="width:96px; height:20px; display: inline-block; line-height:20px; text-align: center; font-size:8px;background:#0C344E;color:white;border-bottom-left-radius:10px;border-bottom-right-radius:10px">Dorad © ${year}</a>
     `;
     // create the button
     var sheet = document.createElement('div');
@@ -131,7 +131,6 @@ function generateTheButton(ris, metas) {
     display:inline-block;
     justify-content:center;
     align-items:bottom;
-    font-family:"Times New Roman", Times, serif;
     `
     sheet.id = 'risBox'
     document.body.appendChild(sheet);
