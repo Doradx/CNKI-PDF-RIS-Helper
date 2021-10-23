@@ -5,7 +5,18 @@ This script is written to find the pdf link to the article when the Refman file 
 - Auto search DOI and PDF;
 - Associate the url of PDF to Risman file and then export.
 
-![A button will be added to the right botton if this script works](https://user-images.githubusercontent.com/23170065/138540356-f3b58ea7-4301-488c-8310-feb7e7a5d306.png)
+This script will generate a floating button in the button right corner of the page, which has three status: **NONE**, **RIS** and **PDF**.
+
+- **PDF**: both **RIS** and **PDF** are available, click the button to download the **RIS** with **PDF** attached. 
+- **RIS**: **RIS** is available, **PDF** is unavailable, click the button to download the **RIS** file, but **PDF** can't be attached automatically. 
+- **NONE**: both **RIS** and **PDF** are unavailable, the button is disabled. 
+
+![PDF](https://user-images.githubusercontent.com/23170065/138558251-6b0ec9cc-a928-4605-bf78-e280e220ee83.png)
+![RIS](https://user-images.githubusercontent.com/23170065/138558261-e9f922b4-13aa-4283-b018-3aaca02002e5.png)
+![NONE](https://user-images.githubusercontent.com/23170065/138558273-66c35587-8fb6-4dab-a82f-befc6739da1c.png)
+
+![A button will be added to the right botton if this script works](https://user-images.githubusercontent.com/23170065/138558345-0ea7f10b-919c-42cc-91d2-f6303e5675b2.png)
+
 
 # Issues & questions
 If you have any issues or questions on this script, please visit [Github Issues](https://github.com/Doradx/CNKI-PDF-RIS-Helper/issues) or [Greasy Fork Feedback](https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper/feedback).
