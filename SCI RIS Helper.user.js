@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.5.3
+// @version      0.5.4
 // @description  download ris and associeted pdf for SCI.
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -284,7 +284,7 @@ function journalMetasAdaptor(){
             metas['abstract'] = $('div.abstract').text();
             break;
         case 'link.springer.com':
-            metas['abstract'] = $('section.abstract,#Abs1-content p').text();
+            metas['abstract'] = $('section.abstract,#Abs1-content,section.Abstract p').text();
             break;
         case 'ascelibrary.org':
             metas['abstract'] = $('article.article div p').text();
