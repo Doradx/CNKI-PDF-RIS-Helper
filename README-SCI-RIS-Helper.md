@@ -16,5 +16,9 @@ If you have any issues or questions on this script, please visit [Github Issues]
 - NHESS - https://nhess.copernicus.org/articles/15/853/2015/
 - Publication Auto PDF - https://greasyfork.org/zh-CN/scripts/38628-publication-auto-pdf
 
+# Reward
+If this script helps you, you can support me with a coffee.
+![](https://blog.cuger.cn/images/pay.jpg)
+
 # Author
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com
