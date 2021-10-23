@@ -18,6 +18,7 @@ If you have any issues or questions on this script, please visit [Github Issues]
 
 # Reward
 If this script helps you, you can support me with a coffee.
+
 ![](https://blog.cuger.cn/images/pay.jpg)
 
 # Author
