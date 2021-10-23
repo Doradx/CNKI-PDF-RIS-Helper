@@ -5,7 +5,7 @@ This script is written to find the pdf link to the article when the Refman file 
 - Auto search DOI and PDF;
 - Associate the url of PDF to Risman file and then export.
 
-
+![A button will be added to the right botton if this script works](https://user-images.githubusercontent.com/23170065/138540356-f3b58ea7-4301-488c-8310-feb7e7a5d306.png)
 
 # Issues & questions
 If you have any issues or questions on this script, please visit [Github Issues](https://github.com/Doradx/CNKI-PDF-RIS-Helper/issues) or [Greasy Fork Feedback](https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper/feedback).
@@ -13,8 +13,6 @@ If you have any issues or questions on this script, please visit [Github Issues]
 # Based on
 - https://dx.doi.org/
 - http://sci-hub.se/
-
-![A button will be added to the right botton if this script works](https://user-images.githubusercontent.com/23170065/138540356-f3b58ea7-4301-488c-8310-feb7e7a5d306.png)
 
 # Inspired by
 - NHESS - https://nhess.copernicus.org/articles/15/853/2015/
