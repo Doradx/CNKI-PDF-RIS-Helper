@@ -12,7 +12,7 @@ If you have any issues or questions on this script, please visit [Github Issues]
 - https://dx.doi.org/
 - http://sci-hub.se/
 
-# Inspiration
+# Inspired by
 - NHESS - https://nhess.copernicus.org/articles/15/853/2015/
 - Publication Auto PDF - https://greasyfork.org/zh-CN/scripts/38628-publication-auto-pdf
 
