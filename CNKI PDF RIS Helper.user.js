@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn/p/5187/
-// @version      0.6.2
+// @version      0.6.3
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
@@ -39,7 +39,6 @@
         }
         risExportBtn.onclick = exportRisEvent
         risExportBtnFixed.onclick = exportRisEvent
-        
         // append the ris button to the button list.
         butttonBoxs[0].append(risExportBtn);
         butttonBoxs[1].append(risExportBtnFixed);
@@ -80,7 +79,7 @@ function updateRowItems() {
             if (operats.getElementsByClassName('downloadlink').length) {
                 var downloadPdf = operats.getElementsByClassName('icon-download')[0];
                 downloadPdf.title = '下载PDF'
-                console.log(downloadPdf.getElementsByTagName('b')[0])
+                //console.log(downloadPdf.getElementsByTagName('b')[0])
                 downloadPdf.getElementsByTagName('b')[0].innerText = '下载PDF'
                 downloadPdf.setAttribute("href", downloadPdf.getAttribute("href") + '&dflag=pdfdown');
             }
@@ -104,8 +103,37 @@ function updateRowItems() {
     }
 }
 
+function getCount(key){
+    return new Promise((resolve, reject) => {
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: "https://api.cuger.cn/count/" + key,
+            headers: {
+                'Connection': 'keep-alive',
+                'Accept': 'text/plain, */*; q=0.01',
+                'X-Requested-With': 'XMLHttpRequest',
+                'User-Agent': navigator.userAgent,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-Fetch-Mode': 'cors'
+            },
+            onload: function (res) {
+                if (res.status == 200) {
+                    const data = JSON.parse(res.responseText);
+                    console.log(`Key: ${data.data.key},Count: ${data.data.count}`);
+                    resolve(res.responseText);
+                } else {
+                    console.log("HTTP Error when get pdf url from sci-hub. " + res.status);
+                    resolve("");
+                }
+            }
+        });
+    })
+}
+
 // type can be EndNote or Refworks
 function downloadByFilename(fileId, dbName, name, type='EndNote') {
+    getCount('CNKI-PDF-RIS-Helper');
     GM_xmlhttpRequest({
         method: "POST",
         url: "https://kns.cnki.net/KNS8/manage/ShowExport",
