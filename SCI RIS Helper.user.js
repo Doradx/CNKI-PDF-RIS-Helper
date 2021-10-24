@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.7.1
+// @version      0.8.0
 // @description  download ris and associeted pdf for SCI.
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -92,7 +92,7 @@ $(document).ready(function () {
     console.log('SCI RIS Helper ———— Dorad, cug.xia@gmail.com')
     // load metas from html
     METAS = getMeta();
-    let jobs = [getRefmanBasedOnMetas(METAS)];
+    let jobs = [getRisFromCuger(METAS.doi),getRisFromCrossCite(METAS.doi)];
 /*    if (!METAS.hasOwnProperty('pdf') || METAS.pdf.slice(-4) !== '.pdf' || window.location.href.indexOf("springer") > 0) {
         jobs.push(getPdfLinkFromSciHubBasedOnDoi(METAS.doi));
     }
@@ -100,24 +100,29 @@ $(document).ready(function () {
     jobs.push(getPdfLinkFromSciHubBasedOnDoi(METAS.doi));
     Promise.all(jobs)
         .then((result) => {
-            if (result.length > 1) {
-                METAS['pdf'] = result[1];
-            }
-            RIS = result[0];
-            // deal with abstract in RIS
-            if (METAS.hasOwnProperty('abstract')) {
-                const erIndex = RIS.indexOf('ER  - ');
-                RIS = RIS.slice(0, erIndex) + "N2  - " + METAS.abstract + "\r\n" + RIS.slice(erIndex, RIS.length);
-            }
-            // deal with pdf url in RIS
-            if (METAS.hasOwnProperty('pdf') && METAS.pdf.length) {
-                const erIndex = RIS.indexOf('ER  - ');
-                RIS = RIS.slice(0, erIndex) + "L1  - " + METAS.pdf + "\r\n" + RIS.slice(erIndex, RIS.length);
+            METAS['pdf'] = result[2];
+            if(result[0].length){
+                // get full ris from cuger.cn
+                RIS = result[0]
+            }else{
+                RIS = result[1]
+                // deal with abstract in RIS
+                if (METAS.hasOwnProperty('abstract')) {
+                    const erIndex = RIS.indexOf('ER  - ');
+                    RIS = RIS.slice(0, erIndex) + "N2  - " + METAS.abstract + "\r\n" + RIS.slice(erIndex, RIS.length);
+                }
+                // deal with pdf url in RIS
+                if (METAS.hasOwnProperty('pdf') && METAS.pdf.length) {
+                    const erIndex = RIS.indexOf('ER  - ');
+                    RIS = RIS.slice(0, erIndex) + "L1  - " + METAS.pdf + "\r\n" + RIS.slice(erIndex, RIS.length);
+                }
+                // push to cuger.cn
+                pushRisToCuger(METAS.doi,RIS);
             }
             return [RIS, METAS];
         })
         .then(() => {
-            console.log('RIS:', RIS);
+            // console.log('RIS:', RIS);
             console.log('METAS:', METAS);
             generateTheButton(RIS, METAS);
         })
@@ -159,23 +164,28 @@ function generateTheButton(ris, metas) {
     // generate the Blob
     const blob = new Blob([ris], { type: "octet/stream" });
     const url = URL.createObjectURL(blob);
-    var downloadFilename = metas.hasOwnProperty('title') ? metas.title.replace("/", "@") + ".ris" : "download.ris";
+    var downloadFilename = metas.hasOwnProperty('title')&&metas.title.length>0 ? metas.title.replace("/", "@") + ".ris" : "download.ris";
     $("#risDownload").attr("href", url);
     $("#risDownload").attr("download", downloadFilename);
     /**
      * set the style.
      */
+    let key = 'SCI-RIS-Helper_NONE';
     if(metas.hasOwnProperty('pdf') && metas.pdf.length && metas.hasOwnProperty('doi') && metas.doi.length && ris.length){
         $("#risDownload").text("PDF");
         $('#risBox').css("background", "#6ECB63");
+        key = 'SCI-RIS-Helper_PDF';
     }else if(ris.length && metas.hasOwnProperty('doi') && metas.doi.length){
         $("#risDownload").text("RIS");
         $('#risBox').css("background", "#118ab2");
+        key = 'SCI-RIS-Helper_RIS';
     }else{
         $("#risDownload").attr("href", "javascript:void(0);");
         $("#risDownload").text("NONE");
         $('#risBox').css("background", "#6E7582");
+        key = 'SCI-RIS-Helper_NONE';
     }
+    getCount(key);
     return sheet;
 }
 
@@ -213,24 +223,24 @@ function getMeta() {
 
 
 // get Refman
-function getRefmanBasedOnMetas(metas) {
+function getRisFromCrossCite(doi) {
     return new Promise((resolve, reject) => {
         GM.xmlHttpRequest({
-            url: "https://dx.doi.org/" + metas.doi,
+            url: "https://dx.doi.org/" + doi,
             method: "GET",
             headers: {
                 "Accept": "application/x-research-info-systems"
             },
             onload: function (res) {
                 if (res.status !== 200) {
-                    console.log('Failed to get the refman information based on doi. DOI: ' + metas.doi, '. HTTP Status Code: ',res.status);
+                    console.log('Failed to get the refman information based on doi. DOI: ' + doi, '. HTTP Status Code: ',res.status);
                     resolve("");
                 }
                 let ris = res.responseText;
                 resolve(ris);
             },
             onerror: function (err) {
-                console.log('Failed to get the refman information based on doi. DOI: ' + metas.doi, err);
+                console.log('Failed to get the refman information based on doi. DOI: ' + doi, err);
                 resolve("");
             }
         });
@@ -248,7 +258,7 @@ function getPdfLinkFromSciHubBasedOnDoi(doi) {
                 'Connection': 'keep-alive',
                 'Accept': 'text/plain, */*; q=0.01',
                 'X-Requested-With': 'XMLHttpRequest',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36',
+                'User-Agent': navigator.userAgent,
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Sec-Fetch-Site': 'same-origin',
                 'Sec-Fetch-Mode': 'cors'
@@ -292,7 +302,7 @@ function getPdfUrlForScienceDirect() {
                 'sec-ch-ua-mobile': '?0',
                 'dnt': '1',
                 'upgrade-insecure-requests': '1',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36',
+                'user-agent': navigator.userAgent,
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'sec-fetch-site': 'none',
                 'sec-fetch-mode': 'navigate',
@@ -321,6 +331,100 @@ function getPdfUrlForScienceDirect() {
     });
 }
 
+// get ris from cuger.cn
+function getRisFromCuger(doi){
+    return new Promise((resolve, reject) => {
+        GM.xmlHttpRequest({
+            method: "GET",
+            url: "https://api.cuger.cn/article/" + doi,
+            headers: {
+                'Connection': 'keep-alive',
+                'Accept': 'text/plain, */*; q=0.01',
+                'X-Requested-With': 'XMLHttpRequest',
+                'User-Agent': navigator.userAgent,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-Fetch-Mode': 'cors'
+            },
+            onload: function (res) {
+                if (res.status == 200) {
+                    const data = JSON.parse(res.responseText);
+                    if(data.code==0){
+                        console.log("Success to get ris from cuger.cn.");
+                        resolve(data.data.ris);
+                    }else{
+                        console.log("Failed to get ris from cuger.cn, " + data.msg);
+                        resolve("");
+                    }
+                } else {
+                    console.log("HTTP Error when get ris from cuger.cn. " + res.status);
+                    resolve("");
+                }
+            }
+        });
+    })
+}
+
+//
+function pushRisToCuger(doi,ris){
+    return new Promise((resolve, reject) => {
+        GM.xmlHttpRequest({
+            method: "POST",
+            url: "https://api.cuger.cn/article/",
+            data: `doi=${doi}&ris=${ris}`,
+            headers: {
+                'Connection': 'keep-alive',
+                'Accept': 'text/plain, */*; q=0.01',
+                'X-Requested-With': 'XMLHttpRequest',
+                'User-Agent': navigator.userAgent,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-Fetch-Mode': 'cors'
+            },
+            onload: function (res) {
+                if (res.status == 200) {
+                    const data = JSON.parse(res.responseText);
+                    if(data.code==0){
+                        console.log('Succeess to push ris to cuger.cn');
+                    }
+                    resolve()
+                } else {
+                    console.log("HTTP Error when psuh ris to cuger.cn. " + res.status);
+                    resolve("");
+                }
+            }
+        });
+    })
+}
+
+function getCount(key){
+    return new Promise((resolve, reject) => {
+        GM.xmlHttpRequest({
+            method: "GET",
+            url: "https://api.cuger.cn/count/" + key,
+            headers: {
+                'Connection': 'keep-alive',
+                'Accept': 'text/plain, */*; q=0.01',
+                'X-Requested-With': 'XMLHttpRequest',
+                'User-Agent': navigator.userAgent,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Sec-Fetch-Site': 'same-origin',
+                'Sec-Fetch-Mode': 'cors'
+            },
+            onload: function (res) {
+                if (res.status == 200) {
+                    const data = JSON.parse(res.responseText);
+                    console.log(`Key: ${data.data.key},Count: ${data.data.count}`);
+                    resolve(res.responseText);
+                } else {
+                    console.log("HTTP Error when get pdf url from sci-hub. " + res.status);
+                    resolve("");
+                }
+            }
+        });
+    })
+}
+
 /**
  * custom journal metas adaptor
  */
@@ -339,12 +443,22 @@ function journalMetasAdaptor() {
         case 'www.tandfonline.com':
         case 'dl.acm.org':
             metas.doi = $('meta[name="dc.Identifier"][scheme="doi"],meta[property="og:url"]').attr("content");
-            metas.title = $('h1.citation__title').text();
+            metas.title = $('h1.citation__title,.NLM_article-title').text();
             metas.abstract = $('div.abstractInFull p').text();
             break;
-        case 'www.sciencedirect.com':
-            metas.abstract = $('div[id^="aep-abstract-sec-"],[id^="abssec"],[id="as0005"] p').text();
+        case 'www.sciencedirect.com':{
+            const articleConfig = $.parseJSON($('script[type="application/json"][data-iso-key="_0"]').text());
+            // console.log(articleConfig);
+            // doi
+            metas.doi = articleConfig.article.doi;
+            // title
+            metas.title = articleConfig.article.titleString;
+            // abstract
+            const abstractDivId = articleConfig.abstracts.content.slice(-1)[0]['$$'].slice(-1)[0]['$']['id'];
+            // console.log('abstractDivId',abstractDivId);
+            metas.abstract = $('div[id="'+abstractDivId+'"] p').text();
             break;
+        }
         case 'pubs.acs.org':
             metas.abstract = $('meta[property="og:description"]').attr("content");
             break;
@@ -388,5 +502,6 @@ function journalMetasAdaptor() {
             break;
         default:
     }
+    console.log(metas);
     return metas;
 }
