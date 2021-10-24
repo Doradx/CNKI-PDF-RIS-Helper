@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.8.0
+// @version      0.8.1
 // @description  download ris and associeted pdf for SCI.
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -212,7 +212,7 @@ function getMeta() {
         }
     }
     // check doi using regrex
-    if(metas.hasOwnProperty('doi') && metas.doi.match(/10\.[^\s\/]+\/[^\s]+/).length == 0){
+    if(metas.hasOwnProperty('doi') && !metas.doi.match(/10\.[^\s\/]+\/[^\s]+/)){
         delete metas.doi;
     }
     if (metas.hasOwnProperty('doi') && metas.doi.match(/10\.[^\s\/]+\/[^\s]+/).length) {
@@ -447,6 +447,7 @@ function journalMetasAdaptor() {
             metas.abstract = $('div.abstractInFull p').text();
             break;
         case 'www.sciencedirect.com':{
+            if(!$('script[type="application/json"][data-iso-key="_0"]').text().length)break;
             const articleConfig = $.parseJSON($('script[type="application/json"][data-iso-key="_0"]').text());
             // console.log(articleConfig);
             // doi
@@ -502,6 +503,6 @@ function journalMetasAdaptor() {
             break;
         default:
     }
-    console.log(metas);
+    // console.log(metas);
     return metas;
 }
