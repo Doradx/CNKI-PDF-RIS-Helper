@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.8.2
+// @version      0.8.3
 // @description  download ris and associeted pdf for SCI.
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -109,12 +109,12 @@ $(document).ready(function () {
             }
             let risRefreshFlag = false;
             // update ris and push to cuger.cn
-            if(!RIS.indexOf('N2  - ') && METAS.hasOwnProperty('abstract') && METAS.abstract.length){
+            if(RIS.indexOf('N2  - ')<0 && METAS.hasOwnProperty('abstract') && METAS.abstract.length){
                 risRefreshFlag = true;
                 const erIndex = RIS.indexOf('ER  - ');
                 RIS = RIS.slice(0, erIndex) + "N2  - " + METAS.abstract + "\r\n" + RIS.slice(erIndex, RIS.length);
             }
-            if (!RIS.indexOf('L1  - ') && METAS.hasOwnProperty('pdf') && METAS.pdf.length) {
+            if (RIS.indexOf('L1  - ')<0 && METAS.hasOwnProperty('pdf') && METAS.pdf.length) {
                 risRefreshFlag = true;
                 const erIndex = RIS.indexOf('ER  - ');
                 RIS = RIS.slice(0, erIndex) + "L1  - " + METAS.pdf + "\r\n" + RIS.slice(erIndex, RIS.length);
@@ -124,7 +124,7 @@ $(document).ready(function () {
             return [RIS, METAS];
         })
         .then(() => {
-            // console.log('RIS:', RIS);
+            console.log('RIS:', RIS);
             console.log('METAS:', METAS);
             generateTheButton(RIS, METAS);
         })
