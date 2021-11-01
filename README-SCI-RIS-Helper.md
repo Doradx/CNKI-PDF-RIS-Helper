@@ -37,5 +37,11 @@ If this script helps you, you can support me with a coffee.
 
 ![](https://blog.cuger.cn/images/pay.jpg)
 
+## Donate records
+| ID   | AMOUNT |
+| ---- | ------ |
+| *达  | ￥10   |
+
+
 # Author
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com
