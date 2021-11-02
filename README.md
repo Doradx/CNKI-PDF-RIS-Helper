@@ -1,6 +1,6 @@
 # 脚本列表
-- SCI RIS Helper  [介绍](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/README-SCI-RIS-Helper.md)  [安装](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js)
-- CNKI PDF RIS Helper  [介绍](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/README.md)  [安装](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/CNKI%20PDF%20RIS%20Helper.user.js)
+- **SCI RIS Helper**  [介绍](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/README-SCI-RIS-Helper.md)  [安装](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js)
+- **CNKI PDF RIS Helper**  [介绍](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/README.md)  [安装](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/CNKI%20PDF%20RIS%20Helper.user.js)
 
 # CNKI-PDF-RIS-Helper
 油猴知网PDF+RIS下载助手，可以直接下载RIS文件，一键导入EndNote，拒绝知网垃圾*txt*导入方案！
