@@ -45,6 +45,8 @@ If this script helps you, you can support me with a coffee.
 | ID   | AMOUNT |
 | ---- | ------ |
 | *达  | ￥10   |
+| Z*l | ￥ 5   |
+
 
 
 # Author
