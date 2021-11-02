@@ -24,6 +24,10 @@ This script has been tested on **EndNote X9.3.3** on Windows 10 20H2.
 # Issues & questions
 If you have any issues or questions on this script, please visit [Github Issues](https://github.com/Doradx/CNKI-PDF-RIS-Helper/issues) or [Greasy Fork Feedback](https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper/feedback).
 
+# Notice
+When you use this script, we will collect the DOI, RIS and PDF URL of articles anonymously, which should be known before using it. 
+There is no way to turn this off for now, so if you mind, please do not use it.
+
 # Based on
 - https://citation.crosscite.org/docs.html
 - http://sci-hub.se/
