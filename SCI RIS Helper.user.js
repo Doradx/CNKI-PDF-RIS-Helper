@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.3
+// @version      0.9.4
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -26,7 +26,9 @@
 // @connect      sci-hub.hkvisa.net
 // @connect      sci-hub.shop
 // @connect      sci-hub.mksa.top
-// @include https://www.webofscience.com/wos/woscc/full-record/*
+// @connect      sci-hub.wf
+// @connect      data.crosscite.org
+// @include https://www.webofscience.com/wos/*
 // @include https://www.scirp.org/journal/*
 // @include https://direct.mit.edu/neco/*
 // @include https://ieeexplore.ieee.org/*document/*
@@ -98,6 +100,10 @@
 // @include https://www.earthdoc.org/content/papers/*
 // @include https://era.library.ualberta.ca/items*
 // @include https://arxiv.org/abs/*
+// @include https://asmedigitalcollection.asme.org/IPC*
+// @include https://open.library.ubc.ca/soa/cIRcle/collections/*
+// @include https://pubs.geoscienceworld.org/aeg/eeg/article/*
+// @include http://othes.univie.ac.at/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -109,7 +115,7 @@ const SCI_HUB_HOST = [
     'https://sci-hub.mksa.top/',
     'https://sci-hub.tf/',
     'https://sci-hub.st/',
-    //    'https://sci-hub.shop/',
+    'https://sci-hub.wf/',
     'https://sci.hubg.org/',
     'https://sci-hub.hkvisa.net/',
     'http://sci-hub.ren/'
@@ -118,20 +124,52 @@ const SCI_HUB_HOST = [
 // const SCI_HUB_BASE_URL = 'https://sci-hub.se/';
 
 const PDF_SCIHUB_FIRST = true; // SCI-HUB or JOURNAL first
+const MaxRetryTimes = 5;
 
 let METAS;
 let RIS;
 let Timer;
-let MaxRetryTimes = 20;
 let HasTriedTimes = 0;
 
-$(document).ready(function () {
+
+addEvents();
+
+// 事件监听
+function addEvents(){
+    const _historyWrap = function (type) {
+        const orig = history[type];
+        const e = new Event(type);
+        return function () {
+            const rv = orig.apply(this, arguments);
+            e.arguments = arguments;
+            window.dispatchEvent(e);
+            return rv;
+        };
+    };
+    history.pushState = _historyWrap('pushState');
+    history.replaceState = _historyWrap('replaceState');
+
+    window.addEventListener('pushState', function (event) {
+        console.log('页面重新加载-pushState')
+        start()
+    })
+
+    window.addEventListener('popstate', function (event) {
+        console.log('页面重新加载-popstate')
+        start()
+    })
+
+    $(document).ready(start)
+}
+
+function start() {
     console.log('SCI RIS Helper ———— Dorad, cug.xia@gmail.com')
     // METAS = getMeta();
-    Timer = setInterval(function(){
-        HasTriedTimes+=1;
+    clearAll();
+    Timer = setInterval(function () {
+        HasTriedTimes += 1;
         METAS = getMeta();
-        if(METAS && METAS.hasOwnProperty('doi') && METAS.doi){
+        if (METAS && METAS.hasOwnProperty('doi') && METAS.doi) {
             clearInterval(Timer);
             console.log('DOI FOUND!', METAS);
             // getRisFromCuger(METAS.doi)
@@ -139,24 +177,24 @@ $(document).ready(function () {
                 RIS = ris;
             })
                 .catch((err) => {
-                console.log(err);
-            })
+                    console.log(err);
+                })
                 .finally(() => {
-                METAS.title = METAS.title ? METAS.title : (__getKeyFromRis(RIS, 'TI') ? __getKeyFromRis(RIS, 'TI') : __getKeyFromRis(RIS, 'T1'));
-                // render
-                console.log('RIS:\n', RIS);
-                console.log('METAS:\n', METAS);
-                generateTheButton(RIS, METAS);
-            })
-        }else{
+                    METAS.title = METAS.title ? METAS.title : (__getKeyFromRis(RIS, 'TI') ? __getKeyFromRis(RIS, 'TI') : __getKeyFromRis(RIS, 'T1'));
+                    // render
+                    console.log('RIS:\n', RIS);
+                    console.log('METAS:\n', METAS);
+                    generateTheButton(RIS, METAS);
+                })
+        } else {
             console.log('DOI NOT FOUND');
-            if(HasTriedTimes>=MaxRetryTimes){
+            if (HasTriedTimes >= MaxRetryTimes) {
                 clearInterval(Timer);
                 generateTheButton(RIS, METAS);
             }
         }
     }, 500);
-})
+}
 
 function generateTheButton(ris, metas) {
     const year = new Date().getFullYear();
@@ -166,7 +204,7 @@ function generateTheButton(ris, metas) {
     <a id="risDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #118ab2";>RIS</a>
     <a id="pdfDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #6ECB63";">RIS+</a>
     <a href="https://blog.cuger.cn" style="width:100%; height:25px; display: inline-block; line-height:28px; text-align: center; font-size:8px;background:#0C344E;color:white;padding:0;margin:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a></div>`)
-        var css = {
+    var css = {
         'line-height': '1.42857143',
         'font-family': '"Arial","微软雅黑","Helvetica,sans-serif","Microsoft YaHei"',
         'font-size': '16px',
@@ -192,13 +230,15 @@ function generateTheButton(ris, metas) {
     }
     $('body').append(sheet);
     $('div#risBox').css(css);
-    if (ris) {
+    if (ris !== undefined && ris) {
+        metas.title = __getKeyFromRis(ris,'TI') ? __getKeyFromRis(ris,'TI') : __getKeyFromRis(ris,'T1');
         // generate the Blob
         const risBlobWithPdf = new Blob([ris], {
             type: "octet/stream"
         });
+        const fileName = metas.hasOwnProperty('title') && metas.title.length > 0 ? metas.title : metas.doi.replace("/", "@")
         const risWithPdfUrl = URL.createObjectURL(risBlobWithPdf);
-        var risWithPdfUrlDownloadName = metas.doi.length > 0 ? metas.doi.replace("/", "@") + ".ris" : "download.ris";
+        var risWithPdfUrlDownloadName = fileName + "-pdf.ris";
         $("#pdfDownload").attr("href", risWithPdfUrl);
         $("#pdfDownload").attr("download", risWithPdfUrlDownloadName);
         // for ris button, remove the L1
@@ -206,7 +246,7 @@ function generateTheButton(ris, metas) {
             type: "octet/stream"
         });
         const risUrl = URL.createObjectURL(risBlob);
-        var risDownloadName = metas.doi.length > 0 ? metas.doi.replace("/", "@") + ".ris" : "download.ris";
+        var risDownloadName = fileName + "-none-pdf.ris";
         $("#risDownload").attr("href", risUrl);
         $("#risDownload").attr("download", risDownloadName);
     }
@@ -241,6 +281,14 @@ function generateTheButton(ris, metas) {
     return sheet;
 }
 
+// clear all button
+function clearAll() {
+    if ($("#risBox")) $("#risBox").remove();
+    METAS = undefined;
+    RIS = undefined;
+    HasTriedTimes = 0;
+}
+
 // load meta
 function getMeta() {
     let metas = journalMetasAdaptor();
@@ -260,11 +308,11 @@ function getMeta() {
         let meta = $(searchStr);
         if (meta.length) {
             metas[key] = meta.attr("content");
-            // console.log(`Get common meta, ${key} = ${meta.attr("content")}`);
+            console.log(`Get common meta, ${key} = ${meta.attr("content")}`);
         }
     }
     // check doi using regrex
-    if (metas.hasOwnProperty('doi') && !metas.doi.match(/10\.[^\s\/]+\/[^\s]+/)) {
+    if (metas.hasOwnProperty('doi') && (!metas.doi || !metas.doi.match(/10\.[^\s\/]+\/[^\s]+/))) {
         delete metas.doi;
     }
     if (metas.hasOwnProperty('doi') && metas.doi.match(/10\.[^\s\/]+\/[^\s]+/).length) {
@@ -284,60 +332,60 @@ function getRisFromOriginSite(metas) {
         delete metas.pdf;
     let risPromise;
     switch (document.domain) {
-    case 'link.springer.com':
-        risPromise = __getRisFromSpringer(metas.doi);
-        break;
-    case 'www.sciencedirect.com':
-        risPromise = __getRisFromScienceDirect(metas.pid);
-        break;
-    default:
-        risPromise = new Promise((resolve, reject) => {
-            reject("No ref from origin site.")
-        });
-        break;
+        case 'link.springer.com':
+            risPromise = __getRisFromSpringer(metas.doi);
+            break;
+        case 'www.sciencedirect.com':
+            risPromise = __getRisFromScienceDirect(metas.pid);
+            break;
+        default:
+            risPromise = new Promise((resolve, reject) => {
+                reject("No ref from origin site.")
+            });
+            break;
     }
     // 同时请求 sci-hub 进行处理
     return new Promise((resolve, reject) => {
         Promise.allSettled([risPromise, __getRisFromCrossCite(metas.doi), getPdfUrlFromScihub(metas.doi)])
-        .then((res) => {
-            // console.log(res);
-            let ris;
-            if (res[0].status == 'rejected' && res[1].status == 'rejected') {
-                reject("Failed to get RIS from origin site.");
-            }
-            if (res[0].status == 'fulfilled') {
-                ris = res[0].value;
-            }
-            if (res[1].status == 'fulfilled') {
-                if (!ris) {
-                    ris = res[1].value;
-                } else {
-                    let r = res[1].value;
-                    for (var key of __getRisKeys(r)) {
-                        ris = __setKeyForRis(ris, key, __getKeyFromRis(r, key))
+            .then((res) => {
+                // console.log(res);
+                let ris;
+                if (res[0].status == 'rejected' && res[1].status == 'rejected') {
+                    reject("Failed to get RIS from origin site.");
+                }
+                if (res[0].status == 'fulfilled') {
+                    ris = res[0].value;
+                }
+                if (res[1].status == 'fulfilled') {
+                    if (!ris) {
+                        ris = res[1].value;
+                    } else {
+                        let r = res[1].value;
+                        for (var key of __getRisKeys(r)) {
+                            ris = __setKeyForRis(ris, key, __getKeyFromRis(r, key))
+                        }
                     }
                 }
-            }
-            if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || PDF_SCIHUB_FIRST)) {
-                metas.pdf = res[2].value;
-            }
-            // update abstract
-            if (ris && ris.indexOf('N2  - ') < 0 && ris.indexOf('AB  - ') < 0 && metas.hasOwnProperty('abstract') && metas.abstract.length) {
-                ris = __setKeyForRis(ris, 'N2', metas.abstract)
-            }
-            // update pdf url
-            if (ris && ris.indexOf('L1  - ') < 0 && metas.hasOwnProperty('pdf') && metas.pdf.length) {
-                ris = __setKeyForRis(ris, 'L1', metas.pdf.replace(/(\?|#)[^'"]*/, ''))
-            }
-            ris = __setKeyForRis(ris, 'DO', metas.doi)
+                if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || PDF_SCIHUB_FIRST)) {
+                    metas.pdf = res[2].value;
+                }
+                // update abstract
+                if (ris && ris.indexOf('N2  - ') < 0 && ris.indexOf('AB  - ') < 0 && metas.hasOwnProperty('abstract') && metas.abstract.length) {
+                    ris = __setKeyForRis(ris, 'N2', metas.abstract)
+                }
+                // update pdf url
+                if (ris && ris.indexOf('L1  - ') < 0 && metas.hasOwnProperty('pdf') && metas.pdf.length) {
+                    ris = __setKeyForRis(ris, 'L1', metas.pdf.replace(/(\?|#)[^'"]*/, ''))
+                }
+                ris = __setKeyForRis(ris, 'DO', metas.doi)
                 // push update to cuger.cn
                 if (__getKeyFromRis(ris, 'L1'))
                     pushRisToCuger(metas.doi, ris);
                 resolve(ris);
-        })
-        .catch((err) => {
-            reject(err);
-        })
+            })
+            .catch((err) => {
+                reject(err);
+            })
     })
 }
 
@@ -408,32 +456,32 @@ function __getScihubHost() {
             jobs.push(__pingHost(host));
         }
         Promise.any(jobs)
-        .then((host) => {
-            localStorage.setItem(key, JSON.stringify({
+            .then((host) => {
+                localStorage.setItem(key, JSON.stringify({
                     value: host,
                     expAt: new Date().getTime() / 1000 + cacheTTL
                 }));
-            bestHost = host;
-        })
-        .catch((err) => {
-            console.log('All the hosts of SCI-HUB are down, please check.' + err.toString());
-        })
+                bestHost = host;
+            })
+            .catch((err) => {
+                console.log('All the hosts of SCI-HUB are down, please check.' + err.toString());
+            })
     }
     console.log('Fastest SCI-HUB host: ' + bestHost);
     return bestHost;
 }
 
 function __pingHost(host) {
-    return new Promise(async(resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         return __httpRequestPromise(host + 'favicon.ico', 'GET', {}, {}, (r, j, res) => {
             r(res);
         })
-        .then(() => {
-            resolve(host);
-        })
-        .catch((err) => {
-            reject(err);
-        })
+            .then(() => {
+                resolve(host);
+            })
+            .catch((err) => {
+                reject(err);
+            })
     })
 }
 
@@ -486,7 +534,7 @@ function __httpRequestPromise(url, method = 'GET', data = null, headers = null, 
         GM.xmlHttpRequest({
             method: method,
             url: url,
-            data: typeof(data) == 'string' ? data : new URLSearchParams(data).toString(),
+            data: typeof (data) == 'string' ? data : new URLSearchParams(data).toString(),
             headers: $.extend({
                 'Connection': 'keep-alive',
                 'Accept': 'text/plain, */*; q=0.01',
@@ -502,7 +550,7 @@ function __httpRequestPromise(url, method = 'GET', data = null, headers = null, 
                 try {
                     if (res.status !== 200)
                         reject("HTTP Code:" + res.status)
-                        responseHandler(resolve, reject, res);
+                    responseHandler(resolve, reject, res);
                 } catch (err) {
                     reject("Unknown error, " + err.toString())
                 }
@@ -518,13 +566,13 @@ function __getRisKeys(ris) {
     if (!ris)
         return undefined;
     const reg = /^(\w+)  \- .*[\r]{0,1}$/gm
-        var m = reg.exec(ris);
+    var m = reg.exec(ris);
     var keys = [];
     while (m) {
         keys.push(m[1])
         m = reg.exec(ris);
     }
-    console.log(keys);
+    // console.log(keys);
     return keys;
 }
 
@@ -532,7 +580,7 @@ function __getKeyFromRis(ris, key) {
     if (!key.length || !ris)
         return undefined;
     let matchRes = ris.match(RegExp(key + '  \- (.*)[\r]{0,1}\n'))
-        return matchRes ? matchRes[1] : undefined;
+    return matchRes ? matchRes[1] : undefined;
 }
 
 function __setKeyForRis(ris, key, value) {
@@ -557,18 +605,18 @@ function journalMetasAdaptor() {
      * all the non standard journal
      */
     switch (window.location.host) {
-    case 'ieeexplore.ieee.org':
-        metas.title = $('meta[property="twitter:title"]').attr("content");
-        metas.doi = $('div.stats-document-abstract-doi a').text();
-        metas.title = $('h1.document-title span').text();
-        break;
-    case 'www.tandfonline.com':
-    case 'dl.acm.org':
-        metas.doi = $('meta[name="dc.Identifier"][scheme="doi"],meta[property="og:url"]').attr("content");
-        metas.title = $('h1.citation__title,.NLM_article-title').text();
-        metas.abstract = $('div.abstractInFull p').text();
-        break;
-    case 'www.sciencedirect.com': {
+        case 'ieeexplore.ieee.org':
+            metas.title = $('meta[property="twitter:title"]').attr("content");
+            metas.doi = $('div.stats-document-abstract-doi a').text();
+            metas.title = $('h1.document-title span').text();
+            break;
+        case 'www.tandfonline.com':
+        case 'dl.acm.org':
+            metas.doi = $('meta[name="dc.Identifier"][scheme="doi"],meta[property="og:url"]').attr("content");
+            metas.title = $('h1.citation__title,.NLM_article-title').text();
+            metas.abstract = $('div.abstractInFull p').text();
+            break;
+        case 'www.sciencedirect.com': {
             if (!$('script[type="application/json"][data-iso-key="_0"]').text().length)
                 break;
             const articleConfig = $.parseJSON($('script[type="application/json"][data-iso-key="_0"]').text());
@@ -585,61 +633,68 @@ function journalMetasAdaptor() {
             metas.abstract = $('div[id="' + abstractDivId + '"] p').text();
             break;
         }
-    case 'pubs.acs.org':
-        metas.abstract = $('meta[property="og:description"]').attr("content");
-        break;
-    case 'onlinelibrary.wiley.com':
-        metas.abstract = $('div.abstract-group section div p').text();
-        break;
-    case 'agupubs.onlinelibrary.wiley.com':
-        metas.abstract = $('div.article-section__content p').text();
-        break;
-    case 'www.cambridge.org':
-        metas.abstract = $('div.abstract').text();
-        break;
-    case 'link.springer.com':
-        metas.abstract = $('section.abstract,#Abs1-content,section.Abstract p').text();
-        break;
-    case 'ascelibrary.org':
-        metas.abstract = $('article.article div p').text();
-        break;
-    case 'nhess.copernicus.org':
-        metas.abstract = $('div.abstract p').text();
-        break;
-    case 'www.worldscientific.com':
-        metas.title = $('h1.citation__title').text();
-        metas.abstract = $('div.NLM_abstract p').text();
-        break;
-    case 'direct.mit.edu':
-        metas.abstract = $('section.abstract p').text();
-        break;
-    case 'academic.oup.com':
-        metas.doi = $('span.article-link-citation a').attr("href");
-        break;
-    case 'www.ingentaconnect.com':
-        metas.abstract = $('div#Abst').text();
-        break;
-    case 'www.science.org':
-        metas.doi = $('meta[name="dc.Relation"]').attr("content");
-        break;
-    case 'www.semanticscholar.org':
-        metas.doi = $('meta[name="citation_pdf_url"]').attr("content");
-        break;
-    case 'www.researchgate.net':
-        metas.doi = $('div.research-detail-meta div ul li.nova-legacy-e-list__item a.nova-legacy-e-link').attr("href");
-        metas.title = $('div.content-page-header div div div div.nova-legacy-e-text').text();
-        break;
-    case 'www.earthdoc.org': {
+        case 'pubs.acs.org':
+            metas.abstract = $('meta[property="og:description"]').attr("content");
+            break;
+        case 'onlinelibrary.wiley.com':
+            metas.abstract = $('div.abstract-group section div p').text();
+            break;
+        case 'agupubs.onlinelibrary.wiley.com':
+            metas.abstract = $('div.article-section__content p').text();
+            break;
+        case 'www.cambridge.org':
+            metas.abstract = $('div.abstract').text();
+            break;
+        case 'link.springer.com':
+            metas.abstract = $('section.abstract,#Abs1-content,section.Abstract p').text();
+            break;
+        case 'ascelibrary.org':
+            metas.abstract = $('article.article div p').text();
+            break;
+        case 'nhess.copernicus.org':
+            metas.abstract = $('div.abstract p').text();
+            break;
+        case 'www.worldscientific.com':
+            metas.title = $('h1.citation__title').text();
+            metas.abstract = $('div.NLM_abstract p').text();
+            break;
+        case 'direct.mit.edu':
+            metas.abstract = $('section.abstract p').text();
+            break;
+        case 'academic.oup.com':
+            // metas.doi = $('span.article-link-citation a').attr("href");
+            break;
+        case 'www.ingentaconnect.com':
+            metas.abstract = $('div#Abst').text();
+            break;
+        case 'www.science.org':
+            metas.doi = $('meta[name="dc.Relation"]').attr("content");
+            break;
+        case 'www.semanticscholar.org':
+            metas.doi = $('meta[name="citation_pdf_url"]').attr("content");
+            break;
+        case 'www.researchgate.net':
+            metas.doi = $('div.research-detail-meta div ul li a.nova-legacy-e-link').text();
+            metas.abstract = $('div.nova-legacy-e-expandable-text__container div:first').text();
+            break;
+        case 'www.earthdoc.org': {
             const pdf = $('div.download-pdf div div form').attr("action");
             metas.pdf = 'https://' + window.location.host + pdf;
             break;
         }
-    case 'www.webofscience.com':
-        metas.doi = $('#FullRTa-DOI').text();
-        metas.abstract = $('#FullRTa-abstract-basic p').text();
-        metas.title = $('#FullRTa-fullRecordtitle-0').text();
-        break;
-    default:
+        case 'www.webofscience.com':
+            metas.doi = $('#FullRTa-DOI').text();
+            metas.abstract = $('#FullRTa-abstract-basic p').text();
+            metas.title = $('#FullRTa-fullRecordtitle-0').text();
+            break;
+        case 'asmedigitalcollection.asme.org':
+            metas.abstract = $('section.abstract p').text();
+            break;
+        case 'othes.univie.ac.at':
+            metas.doi = $('div.ep_summary_content_main div a').attr("href");
+            metas.pdf = $('meta[name="eprints.document_url"]').attr("content")
+            break;
+        default:
     }
     console.log(metas);
     return metas;
