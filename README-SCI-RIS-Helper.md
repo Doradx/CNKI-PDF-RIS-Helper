@@ -46,6 +46,7 @@ If this script helps you, you can support me with a coffee.
 | ---- | ------ |
 | *达  | ￥10   |
 | Z*l | ￥ 5   |
+| a*s | ￥ 10   |
 
 
 
