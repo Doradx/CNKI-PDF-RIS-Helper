@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.4
+// @version      0.9.5
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -27,6 +27,7 @@
 // @connect      sci-hub.shop
 // @connect      sci-hub.mksa.top
 // @connect      sci-hub.wf
+// @connect      sci-hub.yncjkj.com
 // @connect      data.crosscite.org
 // @include https://www.webofscience.com/wos/*
 // @include https://www.scirp.org/journal/*
@@ -131,7 +132,6 @@ let RIS;
 let Timer;
 let HasTriedTimes = 0;
 
-
 addEvents();
 
 // 事件监听
@@ -158,14 +158,13 @@ function addEvents(){
         console.log('页面重新加载-popstate')
         start()
     })
-
     $(document).ready(start)
 }
 
 function start() {
-    console.log('SCI RIS Helper ———— Dorad, cug.xia@gmail.com')
-    // METAS = getMeta();
+    console.log('SCI RIS Helper ———— Dorad, cug.xia@gmail.com');
     clearAll();
+    clearInterval(Timer);
     Timer = setInterval(function () {
         HasTriedTimes += 1;
         METAS = getMeta();
@@ -193,10 +192,11 @@ function start() {
                 generateTheButton(RIS, METAS);
             }
         }
-    }, 500);
+    }, 200);
 }
 
 function generateTheButton(ris, metas) {
+    clearAll();
     const year = new Date().getFullYear();
     let sheet = $(`
     <div id="risBox">
