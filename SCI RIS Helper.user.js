@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.6
+// @version      0.9.7
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -136,7 +136,7 @@ let HasTriedTimes = 0;
 addEvents();
 
 // 事件监听
-function addEvents(){
+function addEvents() {
     const _historyWrap = function (type) {
         const orig = history[type];
         const e = new Event(type);
@@ -180,7 +180,8 @@ function start() {
                     console.log(err);
                 })
                 .finally(() => {
-                    METAS.title = METAS.title ? METAS.title : (__getKeyFromRis(RIS, 'TI') ? __getKeyFromRis(RIS, 'TI') : __getKeyFromRis(RIS, 'T1'));
+                    let risTitle = __getKeyFromRis(RIS, 'TI') ? __getKeyFromRis(RIS, 'TI') : __getKeyFromRis(RIS, 'T1');
+                    METAS.title = risTitle ? risTitle : METAS.title;
                     // render
                     console.log('RIS:\n', RIS);
                     console.log('METAS:\n', METAS);
@@ -196,7 +197,7 @@ function start() {
     }, 200);
 }
 
-function generateTheButton(ris, metas) {
+function generateTheButton(ris) {
     clearAll();
     const year = new Date().getFullYear();
     let sheet = $(`
@@ -231,18 +232,16 @@ function generateTheButton(ris, metas) {
     }
     $('body').append(sheet);
     $('div#risBox').css(css);
-    if (ris !== undefined && ris) {
-        metas.title = __getKeyFromRis(ris,'TI') ? __getKeyFromRis(ris,'TI') : __getKeyFromRis(ris,'T1');
-        // generate the Blob
-        const risBlobWithPdf = new Blob([ris], {
-            type: "octet/stream"
-        });
-        const fileName = metas.hasOwnProperty('title') && metas.title.length > 0 ? metas.title : metas.doi.replace("/", "@")
-        const risWithPdfUrl = URL.createObjectURL(risBlobWithPdf);
-        var risWithPdfUrlDownloadName = fileName + "-pdf.ris";
-        $("#pdfDownload").attr("href", risWithPdfUrl);
-        $("#pdfDownload").attr("download", risWithPdfUrlDownloadName);
-        // for ris button, remove the L1
+    let key = 'SCI-RIS-Helper_NONE'
+    // 不存在RIS
+    if (ris == undefined) {
+        console.log('RIS not exist.');
+    } else {
+        const title = __getKeyFromRis(ris, 'TI') ? __getKeyFromRis(ris, 'TI') : __getKeyFromRis(ris, 'T1');
+        const doi = __getKeyFromRis(ris, 'DO');
+        const pdf = __getKeyFromRis(ris, 'L1');
+
+        const fileName = title == undefined ? doi.replace("/", "@") : title
         const risBlob = new Blob([__setKeyForRis(ris, 'L1', '')], {
             type: "octet/stream"
         });
@@ -250,36 +249,44 @@ function generateTheButton(ris, metas) {
         var risDownloadName = fileName + "-none-pdf.ris";
         $("#risDownload").attr("href", risUrl);
         $("#risDownload").attr("download", risDownloadName);
-    }
-    /**
-     * set the style.
-     */
-    let key = 'SCI-RIS-Helper_NONE';
-    if (ris && metas.hasOwnProperty('pdf') && metas.pdf) {
-        $("#risDownload").css(radiusCSS);
-        $("#noneDownload").hide();
-        key = 'SCI-RIS-Helper_PDF';
-    } else if (ris) {
-        $("#risDownload").css(radiusCSS);
-        $("#noneDownload").hide();
-        $("#pdfDownload").hide();
-        $("#risBox").css({
-            'height': '80px'
-        });
-        // $("#risDownload").text("RIS");
-        // $('#risBox').css("background", "#118ab2");
         key = 'SCI-RIS-Helper_RIS';
-    } else {
-        $("#noneDownload").css(radiusCSS);
-        $("#risBox").css({
-            'height': '80px'
-        });
-        $("#risDownload").hide();
-        $("#pdfDownload").hide();
-        key = 'SCI-RIS-Helper_NONE';
+
+        if (pdf !== undefined) {
+            const risBlobWithPdf = new Blob([ris], {
+                type: "octet/stream"
+            });
+            const risWithPdfUrl = URL.createObjectURL(risBlobWithPdf);
+            var risWithPdfUrlDownloadName = fileName + "-pdf.ris";
+            $("#pdfDownload").attr("href", risWithPdfUrl);
+            $("#pdfDownload").attr("download", risWithPdfUrlDownloadName);
+            key = 'SCI-RIS-Helper_PDF';
+        }
+    }
+    // set style according to key
+    switch (key) {
+        case 'SCI-RIS-Helper_NONE':
+            $("#noneDownload").css(radiusCSS);
+            $("#risBox").css({
+                'height': '80px'
+            });
+            $("#risDownload").hide();
+            $("#pdfDownload").hide();
+            break;
+        case 'SCI-RIS-Helper_RIS':
+            $("#risDownload").css(radiusCSS);
+            $("#noneDownload").hide();
+            $("#pdfDownload").hide();
+            $("#risBox").css({
+                'height': '80px'
+            });
+            break;
+        case 'SCI-RIS-Helper_PDF':
+            $("#risDownload").css(radiusCSS);
+            $("#noneDownload").hide();
+            break;
     }
     getCountFromCuger(key);
-    return sheet;
+    return
 }
 
 // clear all button
@@ -306,6 +313,7 @@ function getMeta() {
         }
         let searchStr = 'meta[name="' + metaDict[key].join('"],meta[name="') + '"]';
         searchStr += ',meta[property="' + metaDict[key].join('"],meta[property="') + '"]';
+        console.log(searchStr);
         let meta = $(searchStr);
         if (meta.length) {
             metas[key] = meta.attr("content");
@@ -675,8 +683,10 @@ function journalMetasAdaptor() {
             metas.doi = $('meta[name="citation_pdf_url"]').attr("content");
             break;
         case 'www.researchgate.net':
-            metas.doi = $('div.research-detail-meta div ul li a.nova-legacy-e-link').text();
+            metas.doi = $("div.research-detail-meta div.nova-legacy-e-text ul.nova-legacy-e-list li.nova-legacy-e-list__item a.nova-legacy-e-link[href*=10]").attr("href");
             metas.abstract = $('div.nova-legacy-e-expandable-text__container div:first').text();
+            // metas.title = $('div.content-page-header div.content-grid__columns div.content-grid__columns--wide div:eq(0)').text();
+            metas.title = $('meta[property="og:title"]').attr("content");
             break;
         case 'www.earthdoc.org': {
             const pdf = $('div.download-pdf div div form').attr("action");
@@ -695,8 +705,12 @@ function journalMetasAdaptor() {
             metas.doi = $('div.ep_summary_content_main div a').attr("href");
             metas.pdf = $('meta[name="eprints.document_url"]').attr("content")
             break;
+        case 'www.nature.com':
+            metas.doi = $('meta[name="dc.identifier"]').attr("content");
+            break;
         default:
     }
+    if (metas.doi) metas.doi = decodeURIComponent(metas.doi);
     console.log(metas);
     return metas;
 }
