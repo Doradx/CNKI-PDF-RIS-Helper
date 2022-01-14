@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.7
+// @version      0.9.8
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -112,18 +112,11 @@
 
 const SCI_HUB_HOST = [
     'https://sci-hub.se/',
-    'https://sci-hub.ee/',
-    'https://sci-hub.mksa.top/',
-    'https://sci-hub.tf/',
     'https://sci-hub.st/',
-    'https://sci-hub.wf/',
-    'https://sci.hubg.org/',
-    'https://sci-hub.hkvisa.net/',
-    'http://sci-hub.ren/',
-    'sci-hub.yncjkj.com/',
+    'https://sci-hub.ru/',
 ];
 
-// const SCI_HUB_BASE_URL = 'https://sci-hub.se/';
+let bestScihubHost = SCI_HUB_HOST[0];
 
 const PDF_SCIHUB_FIRST = true; // SCI-HUB or JOURNAL first
 const MaxRetryTimes = 5;
@@ -452,13 +445,12 @@ function getPdfUrlFromScihub(doi) {
 function __getScihubHost() {
     const key = 'SCIHUB-HOST-Cache';
     const cacheTTL = 60 * 10; // 10 minutes
-    let bestHost = SCI_HUB_HOST[0];
     try {
         let cache = JSON.parse(localStorage.getItem(key));
         if (cache.expAt <= new Date().getTime() / 1000)
             throw Error('Cache expired');
         // console.log('cache:',cache);
-        bestHost = cache.value;
+        bestScihubHost = cache.value;
     } catch (err) {
         let jobs = [];
         for (var host of SCI_HUB_HOST) {
@@ -470,14 +462,14 @@ function __getScihubHost() {
                     value: host,
                     expAt: new Date().getTime() / 1000 + cacheTTL
                 }));
-                bestHost = host;
+                bestScihubHost = host;
             })
             .catch((err) => {
                 console.log('All the hosts of SCI-HUB are down, please check.' + err.toString());
             })
     }
-    console.log('Fastest SCI-HUB host: ' + bestHost);
-    return bestHost;
+    console.log('Fastest SCI-HUB host: ' + bestScihubHost);
+    return bestScihubHost;
 }
 
 function __pingHost(host) {
