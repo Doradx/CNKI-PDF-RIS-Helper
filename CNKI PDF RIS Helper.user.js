@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn/p/5187/
-// @version      0.6.6
+// @version      0.6.7
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
 // @connect      cuger.cn
+// @connect      kns.cnki.net
 // @include      http*cnki.net*
 // @include      http*cnki*edu.cn*
 // @run-at       document-idle
@@ -156,7 +157,8 @@ function downloadByFilename(fileId, dbName, name, type = 'EndNote') {
                 // console.log(text);
                 var a = document.createElement('a');
                 text = text.replaceAll('<br>', '\r\n');
-                text = text.replace(/<[^>]*>|/g, "");
+                text = text.replace(/<[^>\u4e00-\u9fa5]+>/g,"");
+                console.log(text);
                 a.href = 'data:application/x-EndNote-tagged; charset=utf-8,' + encodeURIComponent(text);
                 //supported by chrome 14+ and firefox 20+
                 a.download = name + '.ris';
