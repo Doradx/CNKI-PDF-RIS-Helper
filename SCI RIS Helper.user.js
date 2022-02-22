@@ -436,11 +436,22 @@ function __getRisFromScienceDirect(id) {
 function getPdfUrlFromScihub(doi) {
     return __httpRequestPromise(__getScihubHost() + doi, 'GET', {}, {}, (resolve, reject, res) => {
         let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
-        let pdfUrl = doc.getElementById('pdf').src;
-        pdfUrl = pdfUrl.slice(0, pdfUrl.indexOf('#'));
+        let pdfDomTxt = doc.getElementById('article').innerHTML;
+        let src = /src="(\S+)#\S+"/.exec(pdfDomTxt);
+        if(!src){
+            reject("Failed to find pdf from sci-hub.")
+        }
+        let pdfUrl = src[1];
+        if(pdfUrl.startsWith('//')){
+                pdfUrl = "https:"+ pdfUrl;
+        }else if(pdfUrl.startsWith('/')){
+            pdfUrl = __getScihubHost() + pdfUrl.substring(1);
+        }
+        console.log(pdfUrl)
         resolve(pdfUrl);
     })
 }
+
 
 function __getScihubHost() {
     const key = 'SCIHUB-HOST-Cache';
