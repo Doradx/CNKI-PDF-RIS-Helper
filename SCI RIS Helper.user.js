@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.9
+// @version      0.9.10
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -616,102 +616,107 @@ function journalMetasAdaptor() {
     /**
      * all the non standard journal
      */
-    switch (window.location.host) {
-        case 'ieeexplore.ieee.org':
-            metas.title = $('meta[property="twitter:title"]').attr("content");
-            metas.doi = $('div.stats-document-abstract-doi a').text();
-            metas.title = $('h1.document-title span').text();
-            break;
-        case 'www.tandfonline.com':
-        case 'dl.acm.org':
-            metas.doi = $('meta[name="dc.Identifier"][scheme="doi"],meta[property="og:url"]').attr("content");
-            metas.title = $('h1.citation__title,.NLM_article-title').text();
-            metas.abstract = $('div.abstractInFull p').text();
-            break;
-        case 'www.sciencedirect.com': {
-            if (!$('script[type="application/json"][data-iso-key="_0"]').text().length)
+    try{
+        switch (window.location.host) {
+            case 'ieeexplore.ieee.org':
+                metas.title = $('meta[property="twitter:title"]').attr("content");
+                metas.doi = $('div.stats-document-abstract-doi a').text();
+                metas.title = $('h1.document-title span').text();
                 break;
-            const articleConfig = $.parseJSON($('script[type="application/json"][data-iso-key="_0"]').text());
-            // console.log(articleConfig);
-            // doi
-            metas.doi = articleConfig.article.doi;
-            // pid
-            metas.pid = articleConfig.article.pii;
-            // title
-            metas.title = articleConfig.article.titleString;
-            // abstract
-            const abstractDivId = articleConfig.abstracts.content.slice(-1)[0]['$$'].slice(-1)[0]['$']['id'];
-            // console.log('abstractDivId',abstractDivId);
-            metas.abstract = $('div[id="' + abstractDivId + '"] p').text();
-            break;
+            case 'www.tandfonline.com':
+            case 'dl.acm.org':
+                metas.doi = $('meta[name="dc.Identifier"][scheme="doi"],meta[property="og:url"]').attr("content");
+                metas.title = $('h1.citation__title,.NLM_article-title').text();
+                metas.abstract = $('div.abstractInFull p').text();
+                break;
+            case 'www.sciencedirect.com': {
+                if (!$('script[type="application/json"][data-iso-key="_0"]').text().length)
+                    break;
+                const articleConfig = $.parseJSON($('script[type="application/json"][data-iso-key="_0"]').text());
+                // console.log(articleConfig);
+                // doi
+                metas.doi = articleConfig.article.doi;
+                // pid
+                metas.pid = articleConfig.article.pii;
+                // title
+                metas.title = articleConfig.article.titleString;
+                // abstract
+                const abstractDivId = articleConfig.abstracts.content.slice(-1)[0]['$$'].slice(-1)[0]['$']['id'];
+                // console.log('abstractDivId',abstractDivId);
+                metas.abstract = $('div[id="' + abstractDivId + '"] p').text();
+                break;
+            }
+            case 'pubs.acs.org':
+                metas.abstract = $('meta[property="og:description"]').attr("content");
+                break;
+            case 'onlinelibrary.wiley.com':
+                metas.abstract = $('div.abstract-group section div p').text();
+                break;
+            case 'agupubs.onlinelibrary.wiley.com':
+                metas.abstract = $('div.article-section__content p').text();
+                break;
+            case 'www.cambridge.org':
+                metas.abstract = $('div.abstract').text();
+                break;
+            case 'link.springer.com':
+                metas.abstract = $('section.abstract,#Abs1-content,section.Abstract p').text();
+                break;
+            case 'ascelibrary.org':
+                metas.abstract = $('article.article div p').text();
+                break;
+            case 'nhess.copernicus.org':
+                metas.abstract = $('div.abstract p').text();
+                break;
+            case 'www.worldscientific.com':
+                metas.title = $('h1.citation__title').text();
+                metas.abstract = $('div.NLM_abstract p').text();
+                break;
+            case 'direct.mit.edu':
+                metas.abstract = $('section.abstract p').text();
+                break;
+            case 'academic.oup.com':
+                // metas.doi = $('span.article-link-citation a').attr("href");
+                break;
+            case 'www.ingentaconnect.com':
+                metas.abstract = $('div#Abst').text();
+                break;
+            case 'www.science.org':
+                metas.doi = $('meta[name="dc.Relation"]').attr("content");
+                break;
+            case 'www.semanticscholar.org':
+                metas.doi = $('meta[name="citation_pdf_url"]').attr("content");
+                break;
+            case 'www.researchgate.net':
+                metas.doi = $("div.research-detail-meta div.nova-legacy-e-text ul.nova-legacy-e-list li.nova-legacy-e-list__item a.nova-legacy-e-link[href*=10]").attr("href");
+                metas.abstract = $('div.nova-legacy-e-expandable-text__container div:first').text();
+                // metas.title = $('div.content-page-header div.content-grid__columns div.content-grid__columns--wide div:eq(0)').text();
+                metas.title = $('meta[property="og:title"]').attr("content");
+                break;
+            case 'www.earthdoc.org': {
+                const pdf = $('div.download-pdf div div form').attr("action");
+                metas.pdf = 'https://' + window.location.host + pdf;
+                break;
+            }
+            case 'www.webofscience.com':
+                metas.doi = $('#FullRTa-DOI').text();
+                metas.abstract = $('#FullRTa-abstract-basic p').text();
+                metas.title = $('#FullRTa-fullRecordtitle-0').text();
+                break;
+            case 'asmedigitalcollection.asme.org':
+                metas.abstract = $('section.abstract p').text();
+                break;
+            case 'othes.univie.ac.at':
+                metas.doi = $('div.ep_summary_content_main div a').attr("href");
+                metas.pdf = $('meta[name="eprints.document_url"]').attr("content")
+                break;
+            case 'www.nature.com':
+                metas.doi = $('meta[name="dc.identifier"]').attr("content");
+                break;
+            default:
         }
-        case 'pubs.acs.org':
-            metas.abstract = $('meta[property="og:description"]').attr("content");
-            break;
-        case 'onlinelibrary.wiley.com':
-            metas.abstract = $('div.abstract-group section div p').text();
-            break;
-        case 'agupubs.onlinelibrary.wiley.com':
-            metas.abstract = $('div.article-section__content p').text();
-            break;
-        case 'www.cambridge.org':
-            metas.abstract = $('div.abstract').text();
-            break;
-        case 'link.springer.com':
-            metas.abstract = $('section.abstract,#Abs1-content,section.Abstract p').text();
-            break;
-        case 'ascelibrary.org':
-            metas.abstract = $('article.article div p').text();
-            break;
-        case 'nhess.copernicus.org':
-            metas.abstract = $('div.abstract p').text();
-            break;
-        case 'www.worldscientific.com':
-            metas.title = $('h1.citation__title').text();
-            metas.abstract = $('div.NLM_abstract p').text();
-            break;
-        case 'direct.mit.edu':
-            metas.abstract = $('section.abstract p').text();
-            break;
-        case 'academic.oup.com':
-            // metas.doi = $('span.article-link-citation a').attr("href");
-            break;
-        case 'www.ingentaconnect.com':
-            metas.abstract = $('div#Abst').text();
-            break;
-        case 'www.science.org':
-            metas.doi = $('meta[name="dc.Relation"]').attr("content");
-            break;
-        case 'www.semanticscholar.org':
-            metas.doi = $('meta[name="citation_pdf_url"]').attr("content");
-            break;
-        case 'www.researchgate.net':
-            metas.doi = $("div.research-detail-meta div.nova-legacy-e-text ul.nova-legacy-e-list li.nova-legacy-e-list__item a.nova-legacy-e-link[href*=10]").attr("href");
-            metas.abstract = $('div.nova-legacy-e-expandable-text__container div:first').text();
-            // metas.title = $('div.content-page-header div.content-grid__columns div.content-grid__columns--wide div:eq(0)').text();
-            metas.title = $('meta[property="og:title"]').attr("content");
-            break;
-        case 'www.earthdoc.org': {
-            const pdf = $('div.download-pdf div div form').attr("action");
-            metas.pdf = 'https://' + window.location.host + pdf;
-            break;
-        }
-        case 'www.webofscience.com':
-            metas.doi = $('#FullRTa-DOI').text();
-            metas.abstract = $('#FullRTa-abstract-basic p').text();
-            metas.title = $('#FullRTa-fullRecordtitle-0').text();
-            break;
-        case 'asmedigitalcollection.asme.org':
-            metas.abstract = $('section.abstract p').text();
-            break;
-        case 'othes.univie.ac.at':
-            metas.doi = $('div.ep_summary_content_main div a').attr("href");
-            metas.pdf = $('meta[name="eprints.document_url"]').attr("content")
-            break;
-        case 'www.nature.com':
-            metas.doi = $('meta[name="dc.identifier"]').attr("content");
-            break;
-        default:
+    }
+    catch (error) {
+        console.error(error);
     }
     if (metas.doi) metas.doi = decodeURIComponent(metas.doi);
     console.log(metas);
