@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.10
+// @version      0.9.11
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -105,6 +105,8 @@
 // @include https://open.library.ubc.ca/soa/cIRcle/collections/*
 // @include https://pubs.geoscienceworld.org/aeg/eeg/article/*
 // @include http://othes.univie.ac.at/*
+// @include https://www.atlantis-press.com/journals/*
+// @downloadURL none
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -712,10 +714,12 @@ function journalMetasAdaptor() {
             case 'www.nature.com':
                 metas.doi = $('meta[name="dc.identifier"]').attr("content");
                 break;
+            case 'aip.scitation.org':
+                metas.doi = $('meta[name="citation_doi"]').attr("content");
+                break;
             default:
         }
-    }
-    catch (error) {
+    }catch (error) {
         console.error(error);
     }
     if (metas.doi) metas.doi = decodeURIComponent(metas.doi);
