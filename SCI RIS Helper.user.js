@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.11
+// @version      0.9.12
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -29,6 +29,8 @@
 // @connect      sci-hub.wf
 // @connect      sci-hub.yncjkj.com
 // @connect      data.crosscite.org
+// @connect      mdpi.com
+// @connect      mdpi-res.com
 // @include https://www.webofscience.com/wos/*
 // @include https://www.scirp.org/journal/*
 // @include https://direct.mit.edu/neco/*
@@ -106,6 +108,7 @@
 // @include https://pubs.geoscienceworld.org/aeg/eeg/article/*
 // @include http://othes.univie.ac.at/*
 // @include https://www.atlantis-press.com/journals/*
+// @include https://www.koreascience.or.kr/article/*
 // @downloadURL none
 // ==/UserScript==
 
@@ -286,7 +289,8 @@ function generateTheButton(ris) {
 
 // clear all button
 function clearAll() {
-    if ($("#risBox")) $("#risBox").remove();
+    if ($("#risBox"))
+        $("#risBox").remove();
     METAS = undefined;
     RIS = undefined;
     HasTriedTimes = 0;
@@ -335,6 +339,8 @@ function getRisFromOriginSite(metas) {
     if (!metas.hasOwnProperty('pdf') || !metas.pdf || metas.pdf.indexOf('.pdf') < 0)
         delete metas.pdf;
     let risPromise;
+    let pdfPromise;
+    // get ris from origin site
     switch (document.domain) {
         case 'link.springer.com':
             risPromise = __getRisFromSpringer(metas.doi);
@@ -342,15 +348,27 @@ function getRisFromOriginSite(metas) {
         case 'www.sciencedirect.com':
             risPromise = __getRisFromScienceDirect(metas.pid);
             break;
+        case 'www.mdpi.com':
+            risPromise = __getRisFromMDPI(metas.pid);
+            break;
         default:
             risPromise = new Promise((resolve, reject) => {
                 reject("No ref from origin site.")
             });
             break;
     }
+    switch (document.domain) {
+        case 'www.mdpi.com':
+            pdfPromise = __getPdfUrlFromMDPI(document.URL);
+            break;
+        default:
+            pdfPromise = new Promise((resolve, reject) => {
+                reject("No pdf from origin site.")
+            });
+    }
     // 同时请求 sci-hub 进行处理
     return new Promise((resolve, reject) => {
-        Promise.allSettled([risPromise, __getRisFromCrossCite(metas.doi), getPdfUrlFromScihub(metas.doi)])
+        Promise.allSettled([risPromise, __getRisFromCrossCite(metas.doi), getPdfUrlFromScihub(metas.doi), pdfPromise])
             .then((res) => {
                 // console.log(res);
                 let ris;
@@ -372,7 +390,10 @@ function getRisFromOriginSite(metas) {
                 }
                 if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || PDF_SCIHUB_FIRST)) {
                     metas.pdf = res[2].value;
+                } else if (res[3].status == 'fulfilled') {
+                    metas.pdf = res[3].value;
                 }
+                // console.log('updated metas', metas);
                 // update abstract
                 if (ris && ris.indexOf('N2  - ') < 0 && ris.indexOf('AB  - ') < 0 && metas.hasOwnProperty('abstract') && metas.abstract.length) {
                     ris = __setKeyForRis(ris, 'N2', metas.abstract)
@@ -431,29 +452,64 @@ function __getRisFromScienceDirect(id) {
     })
 }
 
+// get ris from mdpi
+function __getRisFromMDPI(id) {
+    return __httpRequestPromise(`https://www.mdpi.com/export`, 'POST', {
+        'articles_ids[]': id,
+        'export_format_top': 'ris',
+        'export_submit_top': ''
+    }, {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }, (resolve, reject, res) => {
+        let ris = res.responseText;
+        if (ris.match(/<html>[\s\S]*<\/html>/))
+            reject('Error format');
+        ris += '\r\nER  - ';
+        resolve(ris);
+    })
+}
+
 /**
  * PDF url - SCI-HUB
  */
 
 function getPdfUrlFromScihub(doi) {
     return __httpRequestPromise(__getScihubHost() + doi, 'GET', {}, {}, (resolve, reject, res) => {
+        if (res.status !== 200) {
+            reject('Error to get the pdf url from sci-hub');
+        }
         let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
         let pdfDomTxt = doc.getElementById('article').innerHTML;
         let src = /src="(\S+)#\S+"/.exec(pdfDomTxt);
-        if(!src){
+        if (!src) {
             reject("Failed to find pdf from sci-hub.")
         }
         let pdfUrl = src[1];
-        if(pdfUrl.startsWith('//')){
-                pdfUrl = "https:"+ pdfUrl;
-        }else if(pdfUrl.startsWith('/')){
+        if (pdfUrl.startsWith('//')) {
+            pdfUrl = "https:" + pdfUrl;
+        } else if (pdfUrl.startsWith('/')) {
             pdfUrl = __getScihubHost() + pdfUrl.substring(1);
+        } else {
+            reject('Error to get the pdf url from sci-hub');
         }
         console.log(pdfUrl)
         resolve(pdfUrl);
     })
 }
 
+// get PDF from mdpi.com
+
+function __getPdfUrlFromMDPI(url) {
+    console.log(url)
+    return __httpRequestPromise(url + '/pdf', 'GET', {}, {}, (resolve, reject, res) => {
+        if (res.status !== 302 && res.status !== 200) {
+            reject('Error, Not 302 or 200.')
+        }
+        console.log(res)
+        console.log(`redirect from ${res.responseXML.URL} to ${res.finalUrl}`);
+        resolve(res.finalUrl);
+    })
+}
 
 function __getScihubHost() {
     const key = 'SCIHUB-HOST-Cache';
@@ -618,7 +674,7 @@ function journalMetasAdaptor() {
     /**
      * all the non standard journal
      */
-    try{
+    try {
         switch (window.location.host) {
             case 'ieeexplore.ieee.org':
                 metas.title = $('meta[property="twitter:title"]').attr("content");
@@ -717,12 +773,15 @@ function journalMetasAdaptor() {
             case 'aip.scitation.org':
                 metas.doi = $('meta[name="citation_doi"]').attr("content");
                 break;
+            case 'www.mdpi.com':
+                metas.pid = $('input[name="articles_ids[]"]').attr("value");
             default:
         }
-    }catch (error) {
+    } catch (error) {
         console.error(error);
     }
-    if (metas.doi) metas.doi = decodeURIComponent(metas.doi);
+    if (metas.doi)
+        metas.doi = decodeURIComponent(metas.doi);
     console.log(metas);
     return metas;
 }
