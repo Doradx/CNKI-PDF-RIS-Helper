@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.12
+// @version      0.9.13
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -109,7 +109,6 @@
 // @include http://othes.univie.ac.at/*
 // @include https://www.atlantis-press.com/journals/*
 // @include https://www.koreascience.or.kr/article/*
-// @downloadURL none
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -162,6 +161,7 @@ function addEvents() {
 
 function start() {
     console.log('SCI RIS Helper ———— Dorad, cug.xia@gmail.com');
+    printLogo();
     clearAll();
     clearInterval(Timer);
     Timer = setInterval(function () {
@@ -284,6 +284,8 @@ function generateTheButton(ris) {
             break;
     }
     getCountFromCuger(key);
+    // print logo
+    printLogo();
     return
 }
 
@@ -370,7 +372,7 @@ function getRisFromOriginSite(metas) {
     return new Promise((resolve, reject) => {
         Promise.allSettled([risPromise, __getRisFromCrossCite(metas.doi), getPdfUrlFromScihub(metas.doi), pdfPromise])
             .then((res) => {
-                // console.log(res);
+                console.log(res);
                 let ris;
                 if (res[0].status == 'rejected' && res[1].status == 'rejected') {
                     reject("Failed to get RIS from origin site.");
@@ -489,7 +491,9 @@ function getPdfUrlFromScihub(doi) {
             pdfUrl = "https:" + pdfUrl;
         } else if (pdfUrl.startsWith('/')) {
             pdfUrl = __getScihubHost() + pdfUrl.substring(1);
-        } else {
+        } else if (pdfUrl.startsWith('http')){
+            pdfUrl = pdfUrl;
+        }else{
             reject('Error to get the pdf url from sci-hub');
         }
         console.log(pdfUrl)
@@ -784,4 +788,9 @@ function journalMetasAdaptor() {
         metas.doi = decodeURIComponent(metas.doi);
     console.log(metas);
     return metas;
+}
+
+
+function printLogo(){
+    console.log(decodeURIComponent(escape(window.atob("CiAgX19fXyAgICBfX19fICBfX18gICBfX19fICAgX19fICBfX19fICAgIF8gICBfICAgICAgICBfICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogLyBfX198ICAvIF9fX3x8XyBffCB8ICBfIFwgfF8gX3wvIF9fX3wgIHwgfCB8IHwgIF9fXyB8IHwgXyBfXyAgICBfX18gIF8gX18gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKIFxfX18gXCB8IHwgICAgIHwgfCAgfCB8XykgfCB8IHwgXF9fXyBcICB8IHxffCB8IC8gXyBcfCB8fCAnXyBcICAvIF8gXHwgJ19ffCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgX19fKSB8fCB8X19fICB8IHwgIHwgIF8gPCAgfCB8ICBfX18pIHwgfCAgXyAgfHwgIF9fL3wgfHwgfF8pIHx8ICBfXy98IHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogfF9fX18vICBcX19fX3x8X19ffCB8X3wgXF9cfF9fX3x8X19fXy8gIHxffCB8X3wgXF9fX3x8X3x8IC5fXy8gIFxfX198fF98ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICBfX19fICAgICAgICAgICAgICAgICAgICAgICAgICBfICAgICAgICAgICAgICAgICAgICAgICAgfF98ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiB8ICBfIFwgICBfX18gICBfIF9fICBfXyBfICAgX198IHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogfCB8IHwgfCAvIF8gXCB8ICdfX3wvIF9gIHwgLyBfYCB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKIHwgfF98IHx8IChfKSB8fCB8ICB8IChffCB8fCAoX3wgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiB8X19fXy8gIFxfX18vIHxffCAgIFxfXyxffCBcX18sX3wgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXyAgICAgICAgICAgX19fXyAgICAgICAgICAgICAgICAgICAgICAgICAgICBfICBfICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgX19fICBfICAgXyAgIF9fIF8gICAgX18gIF9fKF8pICBfXyBfICAgLyBfXyBcICAgX18gXyAgXyBfXyBfX18gICAgX18gXyAoXyl8IHwgICAgX19fICBfX18gICBfIF9fIF9fXyAgCiAgLyBfX3x8IHwgfCB8IC8gX2AgfCAgIFwgXC8gL3wgfCAvIF9gIHwgLyAvIF9gIHwgLyBfYCB8fCAnXyBgIF8gXCAgLyBfYCB8fCB8fCB8ICAgLyBfX3wvIF8gXCB8ICdfIGAgXyBcIAogfCAoX18gfCB8X3wgfHwgKF98IHwgXyAgPiAgPCB8IHx8IChffCB8fCB8IChffCB8fCAoX3wgfHwgfCB8IHwgfCB8fCAoX3wgfHwgfHwgfCBffCAoX198IChfKSB8fCB8IHwgfCB8IHwKICBcX19ffCBcX18sX3wgXF9fLCB8KF8pL18vXF9cfF98IFxfXyxffCBcIFxfXyxffCBcX18sIHx8X3wgfF98IHxffCBcX18sX3x8X3x8X3woXylcX19ffFxfX18vIHxffCB8X3wgfF98CiAgICAgICAgICAgICAgIHxfX18vICAgICAgICAgICAgICAgICAgICAgIFxfX19fLyAgfF9fXy8gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAo="))));
 }
