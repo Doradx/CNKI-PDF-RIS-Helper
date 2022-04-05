@@ -13,6 +13,7 @@
 
 # 详细介绍
 - https://blog.cuger.cn/p/5187/
+- https://blog.cuger.cn/p/63499/
 
 # Greasy Fork
 - https://greasyfork.org/zh-CN/scripts/425133
