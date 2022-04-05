@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.13
+// @version      0.9.14
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -31,6 +31,7 @@
 // @connect      data.crosscite.org
 // @connect      mdpi.com
 // @connect      mdpi-res.com
+// @connect      ieeexplore.ieee.org
 // @include https://www.webofscience.com/wos/*
 // @include https://www.scirp.org/journal/*
 // @include https://direct.mit.edu/neco/*
@@ -340,39 +341,14 @@ function getRisFromOriginSite(metas) {
     // remove useless pdf url
     if (!metas.hasOwnProperty('pdf') || !metas.pdf || metas.pdf.indexOf('.pdf') < 0)
         delete metas.pdf;
-    let risPromise;
-    let pdfPromise;
-    // get ris from origin site
-    switch (document.domain) {
-        case 'link.springer.com':
-            risPromise = __getRisFromSpringer(metas.doi);
-            break;
-        case 'www.sciencedirect.com':
-            risPromise = __getRisFromScienceDirect(metas.pid);
-            break;
-        case 'www.mdpi.com':
-            risPromise = __getRisFromMDPI(metas.pid);
-            break;
-        default:
-            risPromise = new Promise((resolve, reject) => {
-                reject("No ref from origin site.")
-            });
-            break;
-    }
-    switch (document.domain) {
-        case 'www.mdpi.com':
-            pdfPromise = __getPdfUrlFromMDPI(document.URL);
-            break;
-        default:
-            pdfPromise = new Promise((resolve, reject) => {
-                reject("No pdf from origin site.")
-            });
-    }
+    let risPromise = metas.risPromise;
+    let pdfPromise = metas.pdfPromise;
     // 同时请求 sci-hub 进行处理
     return new Promise((resolve, reject) => {
-        Promise.allSettled([risPromise, __getRisFromCrossCite(metas.doi), getPdfUrlFromScihub(metas.doi), pdfPromise])
+        Promise.allSettled([risPromise(metas), __getRisFromCrossCite(metas.doi), __getPdfUrlFromScihub(metas.doi), pdfPromise(metas)])
             .then((res) => {
                 console.log(res);
+                // RIS
                 let ris;
                 if (res[0].status == 'rejected' && res[1].status == 'rejected') {
                     reject("Failed to get RIS from origin site.");
@@ -390,11 +366,14 @@ function getRisFromOriginSite(metas) {
                         }
                     }
                 }
-                if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || PDF_SCIHUB_FIRST)) {
-                    metas.pdf = res[2].value;
-                } else if (res[3].status == 'fulfilled') {
+                // PDF url
+                if (res[3].status == 'fulfilled') {
                     metas.pdf = res[3].value;
                 }
+                if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || PDF_SCIHUB_FIRST)) {
+                    metas.pdf = res[2].value;
+                }
+
                 // console.log('updated metas', metas);
                 // update abstract
                 if (ris && ris.indexOf('N2  - ') < 0 && ris.indexOf('AB  - ') < 0 && metas.hasOwnProperty('abstract') && metas.abstract.length) {
@@ -402,7 +381,8 @@ function getRisFromOriginSite(metas) {
                 }
                 // update pdf url
                 if (ris && ris.indexOf('L1  - ') < 0 && metas.hasOwnProperty('pdf') && metas.pdf.length) {
-                    ris = __setKeyForRis(ris, 'L1', metas.pdf.replace(/(\?|#)[^'"]*/, ''))
+                    // ris = __setKeyForRis(ris, 'L1', metas.pdf.replace(/(\?|#)[^'"]*/, ''))
+                    ris = __setKeyForRis(ris, 'L1', metas.pdf)
                 }
                 ris = __setKeyForRis(ris, 'DO', metas.doi)
                 // push update to cuger.cn
@@ -428,54 +408,11 @@ function __getRisFromCrossCite(doi) {
     })
 }
 
-function __getRisFromSpringer(doi) {
-    return __httpRequestPromise(`https://citation-needed.springer.com/v2/references/${doi}?format=refman&flavour=citation`, 'GET', {}, {
-        "Accept": "application/x-research-info-systems",
-        'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
-    }, (resolve, reject, res) => {
-        let ris = res.responseText;
-        if (ris.match(/<html>[\s\S]*<\/html>/))
-            reject('Error format');
-        resolve(ris);
-    })
-}
-
-// get ris from sciencedirect
-function __getRisFromScienceDirect(id) {
-    return __httpRequestPromise(`https://www.sciencedirect.com/sdfe/arp/cite?pii=${id}&format=application/x-research-info-systems&withabstract=true`, 'GET', {}, {
-        'authority': 'www.sciencedirect.com',
-        "Accept": "application/x-research-info-systems",
-        'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
-    }, (resolve, reject, res) => {
-        let ris = res.responseText;
-        if (ris.match(/<html>[\s\S]*<\/html>/))
-            reject('Error format');
-        resolve(ris);
-    })
-}
-
-// get ris from mdpi
-function __getRisFromMDPI(id) {
-    return __httpRequestPromise(`https://www.mdpi.com/export`, 'POST', {
-        'articles_ids[]': id,
-        'export_format_top': 'ris',
-        'export_submit_top': ''
-    }, {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    }, (resolve, reject, res) => {
-        let ris = res.responseText;
-        if (ris.match(/<html>[\s\S]*<\/html>/))
-            reject('Error format');
-        ris += '\r\nER  - ';
-        resolve(ris);
-    })
-}
-
 /**
  * PDF url - SCI-HUB
  */
 
-function getPdfUrlFromScihub(doi) {
+function __getPdfUrlFromScihub(doi) {
     return __httpRequestPromise(__getScihubHost() + doi, 'GET', {}, {}, (resolve, reject, res) => {
         if (res.status !== 200) {
             reject('Error to get the pdf url from sci-hub');
@@ -491,27 +428,13 @@ function getPdfUrlFromScihub(doi) {
             pdfUrl = "https:" + pdfUrl;
         } else if (pdfUrl.startsWith('/')) {
             pdfUrl = __getScihubHost() + pdfUrl.substring(1);
-        } else if (pdfUrl.startsWith('http')){
+        } else if (pdfUrl.startsWith('http')) {
             pdfUrl = pdfUrl;
-        }else{
+        } else {
             reject('Error to get the pdf url from sci-hub');
         }
         console.log(pdfUrl)
         resolve(pdfUrl);
-    })
-}
-
-// get PDF from mdpi.com
-
-function __getPdfUrlFromMDPI(url) {
-    console.log(url)
-    return __httpRequestPromise(url + '/pdf', 'GET', {}, {}, (resolve, reject, res) => {
-        if (res.status !== 302 && res.status !== 200) {
-            reject('Error, Not 302 or 200.')
-        }
-        console.log(res)
-        console.log(`redirect from ${res.responseXML.URL} to ${res.finalUrl}`);
-        resolve(res.finalUrl);
     })
 }
 
@@ -669,12 +592,28 @@ function __setKeyForRis(ris, key, value) {
     return ris
 }
 
+function printLogo() {
+    console.log(decodeURIComponent(escape(window.atob("CiAgX19fXyAgICBfX19fICBfX18gICBfX19fICAgX19fICBfX19fICAgIF8gICBfICAgICAgICBfICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogLyBfX198ICAvIF9fX3x8XyBffCB8ICBfIFwgfF8gX3wvIF9fX3wgIHwgfCB8IHwgIF9fXyB8IHwgXyBfXyAgICBfX18gIF8gX18gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKIFxfX18gXCB8IHwgICAgIHwgfCAgfCB8XykgfCB8IHwgXF9fXyBcICB8IHxffCB8IC8gXyBcfCB8fCAnXyBcICAvIF8gXHwgJ19ffCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgX19fKSB8fCB8X19fICB8IHwgIHwgIF8gPCAgfCB8ICBfX18pIHwgfCAgXyAgfHwgIF9fL3wgfHwgfF8pIHx8ICBfXy98IHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogfF9fX18vICBcX19fX3x8X19ffCB8X3wgXF9cfF9fX3x8X19fXy8gIHxffCB8X3wgXF9fX3x8X3x8IC5fXy8gIFxfX198fF98ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICBfX19fICAgICAgICAgICAgICAgICAgICAgICAgICBfICAgICAgICAgICAgICAgICAgICAgICAgfF98ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiB8ICBfIFwgICBfX18gICBfIF9fICBfXyBfICAgX198IHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogfCB8IHwgfCAvIF8gXCB8ICdfX3wvIF9gIHwgLyBfYCB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKIHwgfF98IHx8IChfKSB8fCB8ICB8IChffCB8fCAoX3wgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiB8X19fXy8gIFxfX18vIHxffCAgIFxfXyxffCBcX18sX3wgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXyAgICAgICAgICAgX19fXyAgICAgICAgICAgICAgICAgICAgICAgICAgICBfICBfICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgX19fICBfICAgXyAgIF9fIF8gICAgX18gIF9fKF8pICBfXyBfICAgLyBfXyBcICAgX18gXyAgXyBfXyBfX18gICAgX18gXyAoXyl8IHwgICAgX19fICBfX18gICBfIF9fIF9fXyAgCiAgLyBfX3x8IHwgfCB8IC8gX2AgfCAgIFwgXC8gL3wgfCAvIF9gIHwgLyAvIF9gIHwgLyBfYCB8fCAnXyBgIF8gXCAgLyBfYCB8fCB8fCB8ICAgLyBfX3wvIF8gXCB8ICdfIGAgXyBcIAogfCAoX18gfCB8X3wgfHwgKF98IHwgXyAgPiAgPCB8IHx8IChffCB8fCB8IChffCB8fCAoX3wgfHwgfCB8IHwgfCB8fCAoX3wgfHwgfHwgfCBffCAoX198IChfKSB8fCB8IHwgfCB8IHwKICBcX19ffCBcX18sX3wgXF9fLCB8KF8pL18vXF9cfF98IFxfXyxffCBcIFxfXyxffCBcX18sIHx8X3wgfF98IHxffCBcX18sX3x8X3x8X3woXylcX19ffFxfX18vIHxffCB8X3wgfF98CiAgICAgICAgICAgICAgIHxfX18vICAgICAgICAgICAgICAgICAgICAgIFxfX19fLyAgfF9fXy8gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAo="))));
+}
+
 /**
  * custom journal metas adaptor
+ * here you can add switch case to adaptor new domain according to personalized demand.
  */
 
 function journalMetasAdaptor() {
-    let metas = {};
+    let metas = {
+        risPromise: function(metas){
+            return new Promise((resolve, reject) => {
+                reject("No ref from origin site.")
+            })
+        },
+        pdfPromise: function(metas){
+            return new Promise((resolve, reject) => {
+                reject("No pdf from origin site.")
+            })
+        }
+    };
     /**
      * all the non standard journal
      */
@@ -684,6 +623,17 @@ function journalMetasAdaptor() {
                 metas.title = $('meta[property="twitter:title"]').attr("content");
                 metas.doi = $('div.stats-document-abstract-doi a').text();
                 metas.title = $('h1.document-title span').text();
+                metas.pdfPromise = function (metas) {
+                    const url = $('a.stats-document-lh-action-downloadPdf_2').attr("href");
+                    return __httpRequestPromise(url, 'GET', {}, {}, (resolve, reject, res) => {
+                        if (res.status !== 302 && res.status !== 200) {
+                            reject('Error, Not 302 or 200.')
+                        }
+                        let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
+                        let pdfUrl = doc.getElementsByTagName('iframe')[0].src;
+                        resolve(pdfUrl);
+                    })
+                }
                 break;
             case 'www.tandfonline.com':
             case 'dl.acm.org':
@@ -691,11 +641,12 @@ function journalMetasAdaptor() {
                 metas.title = $('h1.citation__title,.NLM_article-title').text();
                 metas.abstract = $('div.abstractInFull p').text();
                 break;
-            case 'www.sciencedirect.com': {
+            case 'www.sciencedirect.com':
                 if (!$('script[type="application/json"][data-iso-key="_0"]').text().length)
                     break;
                 const articleConfig = $.parseJSON($('script[type="application/json"][data-iso-key="_0"]').text());
                 // console.log(articleConfig);
+                metas.pdfDownload = articleConfig.article.pdfDownload;
                 // doi
                 metas.doi = articleConfig.article.doi;
                 // pid
@@ -706,8 +657,39 @@ function journalMetasAdaptor() {
                 const abstractDivId = articleConfig.abstracts.content.slice(-1)[0]['$$'].slice(-1)[0]['$']['id'];
                 // console.log('abstractDivId',abstractDivId);
                 metas.abstract = $('div[id="' + abstractDivId + '"] p').text();
+                metas.risPromise = function(metas){
+                    return __httpRequestPromise(`https://www.sciencedirect.com/sdfe/arp/cite?pii=${metas.id}&format=application/x-research-info-systems&withabstract=true`, 'GET', {}, {
+                        'authority': 'www.sciencedirect.com',
+                        "Accept": "application/x-research-info-systems",
+                        'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
+                    }, (resolve, reject, res) => {
+                        let ris = res.responseText;
+                        if (ris.match(/<html>[\s\S]*<\/html>/))
+                            reject('Error format');
+                        resolve(ris);
+                    })
+                }
+                metas.pdfPromise = function(metas){
+                    const p = metas.pdfDownload.urlMetadata;
+                    // const url = $('a.accessbar-primary-link').attr('href');
+                    // https://www.sciencedirect.com/science/article/pii/S0003682X21005727/pdfft?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
+                    // https://www.sciencedirect.com/science/article/pii/PDFFT?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
+                    const url = `https://www.sciencedirect.com/${p.path}/${p.pii}${p.pdfExtension}?md5=${p.queryParams.md5}&pid=${p.queryParams.pid}`;
+                    console.log(url);
+                    return __httpRequestPromise(url, 'GET', {}, {
+                        'authority': 'www.sciencedirect.com',
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        // 'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Edg/100.0.1185.29',
+                    }, (resolve, reject, res) => {
+                        // console.log(res)
+                        let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
+                        // console.log($('noscript', doc).html());
+                        let pdfUrl = $('a',$('noscript', doc).html()).attr('href');
+                        resolve(pdfUrl);
+                    })
+                }
                 break;
-            }
             case 'pubs.acs.org':
                 metas.abstract = $('meta[property="og:description"]').attr("content");
                 break;
@@ -722,6 +704,17 @@ function journalMetasAdaptor() {
                 break;
             case 'link.springer.com':
                 metas.abstract = $('section.abstract,#Abs1-content,section.Abstract p').text();
+                metas.risPromise = function (metas) {
+                    return __httpRequestPromise(`https://citation-needed.springer.com/v2/references/${metas.doi}?format=refman&flavour=citation`, 'GET', {}, {
+                        "Accept": "application/x-research-info-systems",
+                        'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
+                    }, (resolve, reject, res) => {
+                        let ris = res.responseText;
+                        if (ris.match(/<html>[\s\S]*<\/html>/))
+                            reject('Error format');
+                        resolve(ris);
+                    })
+                }
                 break;
             case 'ascelibrary.org':
                 metas.abstract = $('article.article div p').text();
@@ -779,6 +772,34 @@ function journalMetasAdaptor() {
                 break;
             case 'www.mdpi.com':
                 metas.pid = $('input[name="articles_ids[]"]').attr("value");
+                metas.risPromise = function(metas) {
+                    // console.log(metas)
+                    return __httpRequestPromise(`https://www.mdpi.com/export`, 'POST', {
+                        'articles_ids[]': metas.pid,
+                        'export_format_top': 'ris',
+                        'export_submit_top': ''
+                    }, {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }, (resolve, reject, res) => {
+                        // console.log(res)
+                        let ris = res.responseText;
+                        if (ris.match(/<html>[\s\S]*<\/html>/))
+                            reject('Error format');
+                        ris += '\r\nER  - ';
+                        resolve(ris);
+                    })
+                }
+                metas.pdfPromise = function(metas){
+                    const url = document.URL;
+                    return __httpRequestPromise(url + '/pdf', 'GET', {}, {}, (resolve, reject, res) => {
+                        if (res.status !== 302 && res.status !== 200) {
+                            reject('Error, Not 302 or 200.')
+                        }
+                        // console.log(res)
+                        console.log(`redirect from ${res.responseXML.URL} to ${res.finalUrl}`);
+                        resolve(res.finalUrl);
+                    })
+                }
             default:
         }
     } catch (error) {
@@ -788,9 +809,4 @@ function journalMetasAdaptor() {
         metas.doi = decodeURIComponent(metas.doi);
     console.log(metas);
     return metas;
-}
-
-
-function printLogo(){
-    console.log(decodeURIComponent(escape(window.atob("CiAgX19fXyAgICBfX19fICBfX18gICBfX19fICAgX19fICBfX19fICAgIF8gICBfICAgICAgICBfICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogLyBfX198ICAvIF9fX3x8XyBffCB8ICBfIFwgfF8gX3wvIF9fX3wgIHwgfCB8IHwgIF9fXyB8IHwgXyBfXyAgICBfX18gIF8gX18gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKIFxfX18gXCB8IHwgICAgIHwgfCAgfCB8XykgfCB8IHwgXF9fXyBcICB8IHxffCB8IC8gXyBcfCB8fCAnXyBcICAvIF8gXHwgJ19ffCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgX19fKSB8fCB8X19fICB8IHwgIHwgIF8gPCAgfCB8ICBfX18pIHwgfCAgXyAgfHwgIF9fL3wgfHwgfF8pIHx8ICBfXy98IHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogfF9fX18vICBcX19fX3x8X19ffCB8X3wgXF9cfF9fX3x8X19fXy8gIHxffCB8X3wgXF9fX3x8X3x8IC5fXy8gIFxfX198fF98ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICBfX19fICAgICAgICAgICAgICAgICAgICAgICAgICBfICAgICAgICAgICAgICAgICAgICAgICAgfF98ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiB8ICBfIFwgICBfX18gICBfIF9fICBfXyBfICAgX198IHwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogfCB8IHwgfCAvIF8gXCB8ICdfX3wvIF9gIHwgLyBfYCB8ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKIHwgfF98IHx8IChfKSB8fCB8ICB8IChffCB8fCAoX3wgfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiB8X19fXy8gIFxfX18vIHxffCAgIFxfXyxffCBcX18sX3wgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXyAgICAgICAgICAgX19fXyAgICAgICAgICAgICAgICAgICAgICAgICAgICBfICBfICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgX19fICBfICAgXyAgIF9fIF8gICAgX18gIF9fKF8pICBfXyBfICAgLyBfXyBcICAgX18gXyAgXyBfXyBfX18gICAgX18gXyAoXyl8IHwgICAgX19fICBfX18gICBfIF9fIF9fXyAgCiAgLyBfX3x8IHwgfCB8IC8gX2AgfCAgIFwgXC8gL3wgfCAvIF9gIHwgLyAvIF9gIHwgLyBfYCB8fCAnXyBgIF8gXCAgLyBfYCB8fCB8fCB8ICAgLyBfX3wvIF8gXCB8ICdfIGAgXyBcIAogfCAoX18gfCB8X3wgfHwgKF98IHwgXyAgPiAgPCB8IHx8IChffCB8fCB8IChffCB8fCAoX3wgfHwgfCB8IHwgfCB8fCAoX3wgfHwgfHwgfCBffCAoX198IChfKSB8fCB8IHwgfCB8IHwKICBcX19ffCBcX18sX3wgXF9fLCB8KF8pL18vXF9cfF98IFxfXyxffCBcIFxfXyxffCBcX18sIHx8X3wgfF98IHxffCBcX18sX3x8X3x8X3woXylcX19ffFxfX18vIHxffCB8X3wgfF98CiAgICAgICAgICAgICAgIHxfX18vICAgICAgICAgICAgICAgICAgICAgIFxfX19fLyAgfF9fXy8gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAo="))));
 }
