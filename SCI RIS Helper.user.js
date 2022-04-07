@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.14
+// @version      0.9.15
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
 // @license      MIT License
-// @grant        GM.xmlHttpRequest
+// @grant        GM_xmlhttpRequest
 // @run-at       document-end
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
@@ -380,7 +380,7 @@ function getRisFromOriginSite(metas) {
                     ris = __setKeyForRis(ris, 'N2', metas.abstract)
                 }
                 // update pdf url
-                if (ris && ris.indexOf('L1  - ') < 0 && metas.hasOwnProperty('pdf') && metas.pdf.length) {
+                if (ris && ris.indexOf('L1  - ') < 0 && metas.hasOwnProperty('pdf') && metas.pdf !== undefined && metas.pdf.length) {
                     // ris = __setKeyForRis(ris, 'L1', metas.pdf.replace(/(\?|#)[^'"]*/, ''))
                     ris = __setKeyForRis(ris, 'L1', metas.pdf)
                 }
@@ -528,19 +528,16 @@ function __httpRequestPromise(url, method = 'GET', data = null, headers = null, 
     resolve(res)
 }) {
     return new Promise((resolve, reject) => {
-        GM.xmlHttpRequest({
+        GM_xmlhttpRequest({
             method: method,
             url: url,
+            anonymous: false,
             data: typeof (data) == 'string' ? data : new URLSearchParams(data).toString(),
             headers: $.extend({
                 'Connection': 'keep-alive',
                 'Accept': 'text/plain, */*; q=0.01',
-                'X-Requested-With': 'XMLHttpRequest',
                 'User-Agent': navigator.userAgent,
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'Sec-Fetch-Site': 'same-origin',
-                'Sec-Fetch-Mode': 'cors',
-                'cookie': document.cookie
             }, headers),
             onload: function (res) {
                 // console.log(res.responseText);
@@ -603,12 +600,12 @@ function printLogo() {
 
 function journalMetasAdaptor() {
     let metas = {
-        risPromise: function(metas){
+        risPromise: function (metas) {
             return new Promise((resolve, reject) => {
                 reject("No ref from origin site.")
             })
         },
-        pdfPromise: function(metas){
+        pdfPromise: function (metas) {
             return new Promise((resolve, reject) => {
                 reject("No pdf from origin site.")
             })
@@ -641,7 +638,7 @@ function journalMetasAdaptor() {
                 metas.title = $('h1.citation__title,.NLM_article-title').text();
                 metas.abstract = $('div.abstractInFull p').text();
                 break;
-            case 'www.sciencedirect.com':
+            case 'www.sciencedirect.com': {
                 if (!$('script[type="application/json"][data-iso-key="_0"]').text().length)
                     break;
                 const articleConfig = $.parseJSON($('script[type="application/json"][data-iso-key="_0"]').text());
@@ -657,8 +654,8 @@ function journalMetasAdaptor() {
                 const abstractDivId = articleConfig.abstracts.content.slice(-1)[0]['$$'].slice(-1)[0]['$']['id'];
                 // console.log('abstractDivId',abstractDivId);
                 metas.abstract = $('div[id="' + abstractDivId + '"] p').text();
-                metas.risPromise = function(metas){
-                    return __httpRequestPromise(`https://www.sciencedirect.com/sdfe/arp/cite?pii=${metas.id}&format=application/x-research-info-systems&withabstract=true`, 'GET', {}, {
+                metas.risPromise = function (metas) {
+                    return __httpRequestPromise(`https://www.sciencedirect.com/sdfe/arp/cite?pii=${metas.pid}&format=application/x-research-info-systems&withabstract=true`, 'GET', {}, {
                         'authority': 'www.sciencedirect.com',
                         "Accept": "application/x-research-info-systems",
                         'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
@@ -669,7 +666,7 @@ function journalMetasAdaptor() {
                         resolve(ris);
                     })
                 }
-                metas.pdfPromise = function(metas){
+                metas.pdfPromise = function (metas) {
                     const p = metas.pdfDownload.urlMetadata;
                     // const url = $('a.accessbar-primary-link').attr('href');
                     // https://www.sciencedirect.com/science/article/pii/S0003682X21005727/pdfft?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
@@ -679,17 +676,22 @@ function journalMetasAdaptor() {
                     return __httpRequestPromise(url, 'GET', {}, {
                         'authority': 'www.sciencedirect.com',
                         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                        // 'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Edg/100.0.1185.29',
+                        'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
+                        // 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Edg/100.0.1185.29',
                     }, (resolve, reject, res) => {
-                        // console.log(res)
-                        let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
-                        // console.log($('noscript', doc).html());
-                        let pdfUrl = $('a',$('noscript', doc).html()).attr('href');
-                        resolve(pdfUrl);
+                        console.log(res)
+                        try {
+                            let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
+                            console.log($('noscript', doc).html());
+                            let pdfUrl = $('a', $('noscript', doc).html()).attr('href');
+                            resolve(pdfUrl);
+                        } catch (err) {
+                            reject(err);
+                        }
                     })
                 }
                 break;
+            }
             case 'pubs.acs.org':
                 metas.abstract = $('meta[property="og:description"]').attr("content");
                 break;
@@ -772,7 +774,7 @@ function journalMetasAdaptor() {
                 break;
             case 'www.mdpi.com':
                 metas.pid = $('input[name="articles_ids[]"]').attr("value");
-                metas.risPromise = function(metas) {
+                metas.risPromise = function (metas) {
                     // console.log(metas)
                     return __httpRequestPromise(`https://www.mdpi.com/export`, 'POST', {
                         'articles_ids[]': metas.pid,
@@ -789,7 +791,7 @@ function journalMetasAdaptor() {
                         resolve(ris);
                     })
                 }
-                metas.pdfPromise = function(metas){
+                metas.pdfPromise = function (metas) {
                     const url = document.URL;
                     return __httpRequestPromise(url + '/pdf', 'GET', {}, {}, (resolve, reject, res) => {
                         if (res.status !== 302 && res.status !== 200) {
