@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.15
+// @version      0.9.16
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -32,6 +32,7 @@
 // @connect      mdpi.com
 // @connect      mdpi-res.com
 // @connect      ieeexplore.ieee.org
+// @connect      fjfsdata01prod.blob.core.windows.net
 // @include https://www.webofscience.com/wos/*
 // @include https://www.scirp.org/journal/*
 // @include https://direct.mit.edu/neco/*
@@ -110,6 +111,10 @@
 // @include http://othes.univie.ac.at/*
 // @include https://www.atlantis-press.com/journals/*
 // @include https://www.koreascience.or.kr/article/*
+// @include https://www.geenmedical.com/article*
+// @include https://www.ncbi.nlm.nih.gov/pmc/articles/*
+// @include https://qjegh.lyellcollection.org/content/*
+// @include https://cdnsciencepub.com/doi/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -701,6 +706,14 @@ function journalMetasAdaptor() {
             case 'agupubs.onlinelibrary.wiley.com':
                 metas.abstract = $('div.article-section__content p').text();
                 break;
+            case 'esajournals.onlinelibrary.wiley.com':
+                metas.pdfPromise = function (metas) {
+                    const url = document.URL;
+                    return new Promise((resolve,reject)=>{
+                        resolve(window.location.origin + '/doi/pdfdirect/' + metas.doi + '?download=true')
+                    })
+                }
+                break;
             case 'www.cambridge.org':
                 metas.abstract = $('div.abstract').text();
                 break;
@@ -737,9 +750,10 @@ function journalMetasAdaptor() {
             case 'www.ingentaconnect.com':
                 metas.abstract = $('div#Abst').text();
                 break;
-            case 'www.science.org':
-                metas.doi = $('meta[name="dc.Relation"]').attr("content");
+            case 'www.science.org':{
+                metas.doi = window.location.href;
                 break;
+            }
             case 'www.semanticscholar.org':
                 metas.doi = $('meta[name="citation_pdf_url"]').attr("content");
                 break;
@@ -802,6 +816,37 @@ function journalMetasAdaptor() {
                         resolve(res.finalUrl);
                     })
                 }
+            case 'www.frontiersin.org':
+                metas.risPromise = function (metas) {
+                    const url = $('a[data-test-id="article-referencemanager"]').attr("href");
+                    // console.log(metas)
+                    return __httpRequestPromise(url, 'GET', {}, {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }, (resolve, reject, res) => {
+                        // console.log(res)
+                        let ris = res.responseText;
+                        if (ris.match(/<html>[\s\S]*<\/html>/))
+                            reject('Error format');
+                        // ris += '\r\nER  - ';
+                        resolve(ris);
+                    })
+                }
+                metas.pdfPromise = function(metas){
+                    const url = $('#SEO_EXP_float_pdf_btn').attr("href");
+                    return __httpRequestPromise(url, 'GET', {}, {}, (resolve, reject, res) => {
+                        if (res.status !== 302 && res.status !== 200) {
+                            reject('Error, Not 302 or 200.')
+                        }
+                        // console.log(res)
+                        console.log(`redirect from ${res.responseXML.URL} to ${res.finalUrl}`);
+                        resolve(res.finalUrl);
+                    })
+                }
+                break;
+            case 'www.ncbi.nlm.nih.gov':
+                metas.pdf = $('li.pdf-link a').attr("href");
+                if(metas.pdf.indexOf('http')==-1)
+                    metas.pdf = window.location.origin + metas.pdf
             default:
         }
     } catch (error) {
