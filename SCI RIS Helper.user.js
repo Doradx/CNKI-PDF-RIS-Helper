@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.16
+// @version      0.9.17
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -128,7 +128,7 @@ const SCI_HUB_HOST = [
 
 let bestScihubHost = SCI_HUB_HOST[0];
 
-const PDF_SCIHUB_FIRST = true; // SCI-HUB or JOURNAL first
+const PDF_SCIHUB_FIRST = false; // SCI-HUB or JOURNAL first
 const MaxRetryTimes = 5;
 
 let METAS;
@@ -709,7 +709,7 @@ function journalMetasAdaptor() {
             case 'esajournals.onlinelibrary.wiley.com':
                 metas.pdfPromise = function (metas) {
                     const url = document.URL;
-                    return new Promise((resolve,reject)=>{
+                    return new Promise((resolve, reject) => {
                         resolve(window.location.origin + '/doi/pdfdirect/' + metas.doi + '?download=true')
                     })
                 }
@@ -750,8 +750,23 @@ function journalMetasAdaptor() {
             case 'www.ingentaconnect.com':
                 metas.abstract = $('div#Abst').text();
                 break;
-            case 'www.science.org':{
+            case 'www.science.org': {
                 metas.doi = window.location.href;
+                /*metas.pdfPromise = function (metas) {
+                    return __httpRequestPromise('https://www.science.org/doi/epdf/'+metas.doi, 'GET', {}, {}, (resolve, reject, res) => {
+                        if (res.status !== 302 && res.status !== 200) {
+                            reject('Error, Not 302 or 200.')
+                        }
+                        if(!res.responseText.match(/"epubUrl":"([\s\S]+?)"/))
+                            reject('No url found.')
+                        let url = res.responseText.match(/"epubUrl":"([\s\S]+?)"/)[1];
+                        url = 'https://' + window.location.host + url;
+                        url = url.replace("\\u003d","=");
+                        // url = decodeURIComponent(JSON.parse('"' + url + '"'));
+                        console.log(`redirect from ${res.responseXML.URL} to ${url}`);
+                        resolve(url);
+                    })
+                }*/
                 break;
             }
             case 'www.semanticscholar.org':
@@ -831,7 +846,7 @@ function journalMetasAdaptor() {
                         resolve(ris);
                     })
                 }
-                metas.pdfPromise = function(metas){
+                metas.pdfPromise = function (metas) {
                     const url = $('#SEO_EXP_float_pdf_btn').attr("href");
                     return __httpRequestPromise(url, 'GET', {}, {}, (resolve, reject, res) => {
                         if (res.status !== 302 && res.status !== 200) {
@@ -845,7 +860,7 @@ function journalMetasAdaptor() {
                 break;
             case 'www.ncbi.nlm.nih.gov':
                 metas.pdf = $('li.pdf-link a').attr("href");
-                if(metas.pdf.indexOf('http')==-1)
+                if (metas.pdf.indexOf('http') == -1)
                     metas.pdf = window.location.origin + metas.pdf
             default:
         }
