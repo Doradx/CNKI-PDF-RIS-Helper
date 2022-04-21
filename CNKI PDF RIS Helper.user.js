@@ -78,11 +78,11 @@
         //     butttonBoxs[0].append(risPlusExportBtnFixed);
         // }
         /** PDF button for Thesis */
-        console.log(['CDFD','CMFD'].indexOf(dbCode)>-1 && paper.hasOwnProperty('pdf'));
-        if(['CDFD','CMFD'].indexOf(dbCode)>-1 && paper.hasOwnProperty('pdf')){
+        console.log(['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf'));
+        if (['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf')) {
             var pdfDownloadBtn = risExportBtn.cloneNode(true)
-            const pdfUrl = "https://"+document.domain+paper.pdf;
-            pdfDownloadBtn.innerHTML = "<a href="+pdfUrl+" target='_blank'><i></i>PDF下载</a>";
+            const pdfUrl = "https://" + document.domain + paper.pdf;
+            pdfDownloadBtn.innerHTML = "<a href=" + pdfUrl + " target='_blank'><i></i>PDF下载</a>";
             // pdfDownloadBtn.setAttribute("href", "https://"+document.domain+paper.pdf);
             butttonBoxs[0].append(pdfDownloadBtn);
         }
@@ -207,7 +207,7 @@ function getCount(key) {
 
 function setSearchCache(paperList) {
     const key = 'PAPER-SAERCH-CACHE'
-    const cacheTTL = 60 * 60* 24; // 10 minutes
+    const cacheTTL = 60 * 60 * 24; // 10 minutes
     if (paperList.length <= 0)
         return
     localStorage.setItem(key, JSON.stringify({
@@ -240,7 +240,7 @@ function downloadRisOfPaper(paper) {
     if (paper.hasOwnProperty('pdf')) {
         getPdfUrl(paper.pdf)
             .then((pdfUrl) => {
-                console.log(paper,pdfUrl);
+                console.log(paper, pdfUrl);
                 downloadByFilename(paper.fileId, paper.dbName, paper.title, 'EndNote', pdfUrl);
             })
             .catch((err) => {
