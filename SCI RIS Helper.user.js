@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SCI RIS Helper
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.17
+// @version      0.9.18
 // @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
 // @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
 // @author       Dorad
@@ -122,7 +122,7 @@
 
 const SCI_HUB_HOST = [
     'https://sci-hub.se/',
-    'https://sci-hub.st/',
+    //'https://sci-hub.st/',
     'https://sci-hub.ru/',
 ];
 
@@ -702,6 +702,24 @@ function journalMetasAdaptor() {
                 break;
             case 'onlinelibrary.wiley.com':
                 metas.abstract = $('div.abstract-group section div p').text();
+                metas.risPromise = function (metas) {
+                    return __httpRequestPromise('https://onlinelibrary.wiley.com/action/downloadCitation', 'POST', {
+                        'doi': metas.doi,
+                        'downloadFileName': metas.title,
+                        'include': 'abs',
+                        'format': 'ris',
+                        'direct': 'direct',
+                        'submit': 'Download'
+                    }, {
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
+                    }, (resolve, reject, res) => {
+                        let ris = res.responseText;
+                        if (ris.match(/<html>[\s\S]*<\/html>/))
+                            reject('Error format');
+                        resolve(ris);
+                    })
+                }
                 break;
             case 'agupubs.onlinelibrary.wiley.com':
                 metas.abstract = $('div.article-section__content p').text();
@@ -752,21 +770,6 @@ function journalMetasAdaptor() {
                 break;
             case 'www.science.org': {
                 metas.doi = window.location.href;
-                /*metas.pdfPromise = function (metas) {
-                    return __httpRequestPromise('https://www.science.org/doi/epdf/'+metas.doi, 'GET', {}, {}, (resolve, reject, res) => {
-                        if (res.status !== 302 && res.status !== 200) {
-                            reject('Error, Not 302 or 200.')
-                        }
-                        if(!res.responseText.match(/"epubUrl":"([\s\S]+?)"/))
-                            reject('No url found.')
-                        let url = res.responseText.match(/"epubUrl":"([\s\S]+?)"/)[1];
-                        url = 'https://' + window.location.host + url;
-                        url = url.replace("\\u003d","=");
-                        // url = decodeURIComponent(JSON.parse('"' + url + '"'));
-                        console.log(`redirect from ${res.responseXML.URL} to ${url}`);
-                        resolve(url);
-                    })
-                }*/
                 break;
             }
             case 'www.semanticscholar.org':
