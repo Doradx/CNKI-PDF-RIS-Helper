@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn/p/5187/
-// @version      0.6.8
+// @version      0.6.9
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
@@ -127,7 +127,11 @@ function updateRowItems() {
             // replace the download with pdf
             if (operats.getElementsByClassName('downloadlink').length) {
                 var downloadPdf = operats.getElementsByClassName('icon-download')[0];
-                downloadPdf.title = 'PDF下载'
+                if (downloadPdf == null) {
+                    console.log("产品未订阅: " + title)
+                    continue
+                }
+                downloadPdf.setAttribute("title", 'PDF下载')
                 //console.log(downloadPdf.getElementsByTagName('b')[0])
                 downloadPdf.getElementsByTagName('b')[0].innerText = 'PDF下载'
                 downloadPdf.setAttribute("href", downloadPdf.getAttribute("href") + '&dflag=pdfdown');
