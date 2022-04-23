@@ -1,15 +1,22 @@
 // ==UserScript==
-// @name         SCI RIS Helper
+// @name         SCI RIS Helper - EndNote+Scihub
+// @name:zh-CN   SCI RIS Helper - EndNote+Sci-hub强强联合一键下载导入论文
+// @name:de      SCI RIS Helper - EndNote+Scihub
+// @name:ja      SCI RIS Helper - EndNote+Scihub
+// @name:es      SCI RIS Helper - EndNote+Scihub
+// @description  Download the Refman(*.ris) with pdf URL queried from Sci-hub. Supported 80+ sites include Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPI, etc. Just see: https://blog.cuger.cn/p/63499/
+// @description:zh-CN 一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect和MDPI等80+种网站。
+// @description:de Laden Sie den Refman(*.ris) mit der von Sci-hub abgefragten pdf-URL herunter. Zu den über 80 unterstützten Websites gehören Web of Science, Researchgate, Springer, ScienceDirect, IEEE, MDPI usw.
+// @description:ja Refman(*.ris)のpdf URLをSci-hubから照会してダウンロードします。Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPIなど、80以上のサイトに対応しています。
+// @description:es Laadige Refman(*.ris) alla Sci-hubist küsitud pdf URL-iga. Toetatud 80+ saidi hulka kuuluvad Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPI jne.
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
-// @version      0.9.18
-// @description  Download ris and associeted pdf for SCI. Blog:https://blog.cuger.cn/p/63499/
-// @description:zh-CN  自动关联SCI下载中的RIS文件和PDF, 使得导入RIS时可以自动导入PDF。
+// @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
+// @supportURL   https://blog.cuger.cn/p/63499/
+// @version      0.9.19
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
 // @run-at       document-end
-// @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
-// @supportURL   https://blog.cuger.cn/p/63499/
 // @icon         data:image/png;base64,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
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js
 // @connect      cuger.cn
@@ -21,6 +28,7 @@
 // @connect      sci-hub.se
 // @connect      sci-hub.tf
 // @connect      sci-hub.st
+// @connect      sci-hub.ru
 // @connect      sci-hub.ren
 // @connect      sci.hubg.org
 // @connect      sci-hub.hkvisa.net
@@ -33,88 +41,88 @@
 // @connect      mdpi-res.com
 // @connect      ieeexplore.ieee.org
 // @connect      fjfsdata01prod.blob.core.windows.net
-// @include https://www.webofscience.com/wos/*
-// @include https://www.scirp.org/journal/*
-// @include https://direct.mit.edu/neco/*
-// @include https://ieeexplore.ieee.org/*document/*
-// @include https://ascelibrary.org/doi/*
-// @include https://nhess.copernicus.org/articles/*
-// @include https://www.cambridge.org/core/journals/*
-// @include https://www.mdpi.com/*
-// @include http://en.cgsjournals.com/article/doi/*
-// @include https://adgeo.copernicus.org/articles/*
-// @include https://papers.ssrn.com/*
-// @include https://www.sciencedirect.com/science/article/*
-// @include https://onlinelibrary.wiley.com/doi/*
-// @include https://*.onlinelibrary.wiley.com/doi/*
-// @include https://pubs.acs.org/doi/*
-// @include https://www.tandfonline.com/doi/*
-// @include https://www.beilstein-journals.org/*
-// @include https://www.eurekaselect.com/*/article*
-// @include https://pubs.rsc.org/en/Content/*
-// @include https://*.springer.com/article*
-// @include https://*.springer.com/chapter/*
-// @include https://*.springeropen.com/article*
-// @include https://aip.scitation.org/doi/*
-// @include https://www.nature.com/articles*
-// @include https://*.sciencemag.org/content*
-// @include https://journals.aps.org/*/abstract/10*
-// @include https://www.nrcresearchpress.com/doi/10*
-// @include https://iopscience.iop.org/article/10*
-// @include https://www.cell.com/*/fulltext/*
-// @include https://journals.lww.com/*
-// @include https://*.biomedcentral.com/articles/*
-// @include https://journals.sagepub.com/doi/*
-// @include https://academic.oup.com/*/article/*
-// @include https://www.karger.com/Article/*
-// @include https://www.cambridge.org/core/journals/*/article/*
-// @include https://www.annualreviews.org/doi/*
-// @include https://www.jstage.jst.go.jp/article/*
-// @include https://www.hindawi.com/journals/*
-// @include https://www.cardiology.theclinics.com/article/*
-// @include https://www.liebertpub.com/doi/*
-// @include https://thorax.bmj.com/content/*
-// @include https://journals.physiology.org/doi/*
-// @include https://www.ahajournals.org/doi/*
-// @include https://dl.acm.org/doi/*
-// @include https://*.asm.org/content/*
-// @include https://content.apa.org/*
-// @include https://www.thelancet.com/journals/*/article/*
-// @include https://jamanetwork.com/journals/*
-// @include https://*.aacrjournals.org/content/*
-// @include https://royalsocietypublishing.org/doi/*
-// @include https://journals.plos.org/*/article*
-// @include https://*.psychiatryonline.org/doi/*
-// @include https://www.osapublishing.org/*/abstract.cfm*
-// @include https://www.thieme-connect.de/products/ejournals/*
-// @include https://journals.ametsoc.org/*/article/*
-// @include https://www.frontiersin.org/articles/*
-// @include https://www.worldscientific.com/doi/*
-// @include https://www.nejm.org/doi/*
-// @include https://ascopubs.org/doi/*
-// @include https://www.jto.org/article/*
-// @include https://www.jci.org/articles/*
-// @include https://pubmed.ncbi.nlm.nih.gov/*
-// @include https://www.spiedigitallibrary.org/conference-*
-// @include https://www.ingentaconnect.com/content/*
-// @include https://www.taylorfrancis.com/*
-// @include https://www.science.org/doi/*
-// @include https://www.scinapse.io/papers/*
-// @include https://www.semanticscholar.org/paper/*
-// @include https://www.researchgate.net/publication/*
-// @include https://www.earthdoc.org/content/papers/*
-// @include https://era.library.ualberta.ca/items*
-// @include https://arxiv.org/abs/*
-// @include https://asmedigitalcollection.asme.org/IPC*
-// @include https://open.library.ubc.ca/soa/cIRcle/collections/*
-// @include https://pubs.geoscienceworld.org/aeg/eeg/article/*
-// @include http://othes.univie.ac.at/*
-// @include https://www.atlantis-press.com/journals/*
-// @include https://www.koreascience.or.kr/article/*
-// @include https://www.geenmedical.com/article*
-// @include https://www.ncbi.nlm.nih.gov/pmc/articles/*
-// @include https://qjegh.lyellcollection.org/content/*
-// @include https://cdnsciencepub.com/doi/*
+// @match        *://www.webofscience.com/wos/*
+// @match        *://www.scirp.org/journal/*
+// @match        *://direct.mit.edu/neco/*
+// @match        *://ieeexplore.ieee.org/*document/*
+// @match        *://ascelibrary.org/doi/*
+// @match        *://nhess.copernicus.org/articles/*
+// @match        *://www.cambridge.org/core/journals/*
+// @match        *://www.mdpi.com/*
+// @match        *://en.cgsjournals.com/article/doi/*
+// @match        *://adgeo.copernicus.org/articles/*
+// @match        *://papers.ssrn.com/*
+// @match        *://www.sciencedirect.com/science/article/*
+// @match        *://onlinelibrary.wiley.com/doi/*
+// @match        *://*.onlinelibrary.wiley.com/doi/*
+// @match        *://pubs.acs.org/doi/*
+// @match        *://www.tandfonline.com/doi/*
+// @match        *://www.beilstein-journals.org/*
+// @match        *://www.eurekaselect.com/*/article*
+// @match        *://pubs.rsc.org/en/Content/*
+// @match        *://*.springer.com/article*
+// @match        *://*.springer.com/chapter/*
+// @match        *://*.springeropen.com/article*
+// @match        *://aip.scitation.org/doi/*
+// @match        *://www.nature.com/articles*
+// @match        *://*.sciencemag.org/content*
+// @match        *://journals.aps.org/*/abstract/10*
+// @match        *://www.nrcresearchpress.com/doi/10*
+// @match        *://iopscience.iop.org/article/10*
+// @match        *://www.cell.com/*/fulltext/*
+// @match        *://journals.lww.com/*
+// @match        *://*.biomedcentral.com/articles/*
+// @match        *://journals.sagepub.com/doi/*
+// @match        *://academic.oup.com/*/article/*
+// @match        *://www.karger.com/Article/*
+// @match        *://www.cambridge.org/core/journals/*/article/*
+// @match        *://www.annualreviews.org/doi/*
+// @match        *://www.jstage.jst.go.jp/article/*
+// @match        *://www.hindawi.com/journals/*
+// @match        *://www.cardiology.theclinics.com/article/*
+// @match        *://www.liebertpub.com/doi/*
+// @match        *://thorax.bmj.com/content/*
+// @match        *://journals.physiology.org/doi/*
+// @match        *://www.ahajournals.org/doi/*
+// @match        *://dl.acm.org/doi/*
+// @match        *://*.asm.org/content/*
+// @match        *://content.apa.org/*
+// @match        *://www.thelancet.com/journals/*/article/*
+// @match        *://jamanetwork.com/journals/*
+// @match        *://*.aacrjournals.org/content/*
+// @match        *://royalsocietypublishing.org/doi/*
+// @match        *://journals.plos.org/*/article*
+// @match        *://*.psychiatryonline.org/doi/*
+// @match        *://www.osapublishing.org/*/abstract.cfm*
+// @match        *://www.thieme-connect.de/products/ejournals/*
+// @match        *://journals.ametsoc.org/*/article/*
+// @match        *://www.frontiersin.org/articles/*
+// @match        *://www.worldscientific.com/doi/*
+// @match        *://www.nejm.org/doi/*
+// @match        *://ascopubs.org/doi/*
+// @match        *://www.jto.org/article/*
+// @match        *://www.jci.org/articles/*
+// @match        *://pubmed.ncbi.nlm.nih.gov/*
+// @match        *://www.spiedigitallibrary.org/conference-*
+// @match        *://www.ingentaconnect.com/content/*
+// @match        *://www.taylorfrancis.com/*
+// @match        *://www.science.org/doi/*
+// @match        *://www.scinapse.io/papers/*
+// @match        *://www.semanticscholar.org/paper/*
+// @match        *://www.researchgate.net/publication/*
+// @match        *://www.earthdoc.org/content/papers/*
+// @match        *://era.library.ualberta.ca/items*
+// @match        *://arxiv.org/abs/*
+// @match        *://asmedigitalcollection.asme.org/IPC*
+// @match        *://open.library.ubc.ca/soa/cIRcle/collections/*
+// @match        *://pubs.geoscienceworld.org/aeg/eeg/article/*
+// @match        *://othes.univie.ac.at/*
+// @match        *://www.atlantis-press.com/journals/*
+// @match        *://www.koreascience.or.kr/article/*
+// @match        *://www.geenmedical.com/article*
+// @match        *://www.ncbi.nlm.nih.gov/pmc/articles/*
+// @match        *://qjegh.lyellcollection.org/content/*
+// @match        *://cdnsciencepub.com/doi/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -807,8 +815,8 @@ function journalMetasAdaptor() {
             case 'www.mdpi.com':
                 metas.pid = $('input[name="articles_ids[]"]').attr("value");
                 metas.risPromise = function (metas) {
-                    // console.log(metas)
-                    return __httpRequestPromise(`https://www.mdpi.com/export`, 'POST', {
+                    // console.log(metas);
+                    return __httpRequestPromise('https://www.mdpi.com/export', 'POST', {
                         'articles_ids[]': metas.pid,
                         'export_format_top': 'ris',
                         'export_submit_top': ''
@@ -829,11 +837,12 @@ function journalMetasAdaptor() {
                         if (res.status !== 302 && res.status !== 200) {
                             reject('Error, Not 302 or 200.')
                         }
-                        // console.log(res)
+                        console.log(res)
                         console.log(`redirect from ${res.responseXML.URL} to ${res.finalUrl}`);
                         resolve(res.finalUrl);
                     })
                 }
+                break;
             case 'www.frontiersin.org':
                 metas.risPromise = function (metas) {
                     const url = $('a[data-test-id="article-referencemanager"]').attr("href");
