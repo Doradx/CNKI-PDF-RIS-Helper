@@ -4,7 +4,7 @@
 
 ## SCI RIS Helper ![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json) ![](https://img.shields.io/badge/dynamic/json?color=red&label=GreasyFork&query=total_installs&suffix=%20total%20installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json?style=flat) ![](https://img.shields.io/badge/dynamic/json?color=green&label=GreasyFork&query=daily_installs&suffix=%20daily%20installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json) 
 
-[详细介绍](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/README-SCI-RIS-Helper.md)  [安装链接](https://greasyfork.org/en/scripts/434310) [博客介绍](https://blog.cuger.cn/p/63499/) [Introduction](./README-SCI-RIS-Helper.md)
+[详细介绍](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/README-SCI-RIS-Helper-zh-CN.md)  [安装链接](https://greasyfork.org/en/scripts/434310) [博客介绍](https://blog.cuger.cn/p/63499/) [Introduction](./README-SCI-RIS-Helper.md)
 
 一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect和MDPI等80+种网站。
 
