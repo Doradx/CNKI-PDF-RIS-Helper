@@ -1,5 +1,9 @@
-# SCI RIS Helper v0.9.17
+# SCI RIS Helper - EndNote+Scihub
 This script is written to find the pdf link to the article when the Refman file is downloaded. The pdf file will then be automatically downloaded and associated with the reference when being imported into EndNote.
+
+This script can download the Refman(*.ris) with pdf URL queried from Sci-hub. 
+
+Supported 80+ sites include Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPI, etc. Just see: https://blog.cuger.cn/p/63499/
 
 # Ability
 - Auto search DOI and PDF;
