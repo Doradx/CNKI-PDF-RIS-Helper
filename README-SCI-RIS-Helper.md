@@ -1,4 +1,6 @@
 # SCI RIS Helper - EndNote+Scihub
+![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json) ![](https://img.shields.io/badge/dynamic/json?color=red&label=GreasyFork&query=total_installs&suffix=%20total%20installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json?style=flat) ![](https://img.shields.io/badge/dynamic/json?color=green&label=GreasyFork&query=daily_installs&suffix=%20daily%20installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json)
+
 This script is written to find the pdf link to the article when the Refman file is downloaded. The pdf file will then be automatically downloaded and associated with the reference when being imported into EndNote.
 
 This script can download the Refman(*.ris) with pdf URL queried from Sci-hub. 
