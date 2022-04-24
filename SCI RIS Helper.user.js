@@ -217,8 +217,11 @@ function generateTheButton(ris) {
     <div id="risBox">
     <a id="noneDownload" href="javascript:void(0);" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #6E7582";>NONE</a>
     <a id="risDownload" href="javascript:void(0);" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #118ab2";>RIS</a>
-    <a id="pdfDownload" href="javascript:void(0);" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #6ECB63";">RIS+</a>
-    <a href="https://blog.cuger.cn" style="width:100%; height:25px; display: inline-block; line-height:28px; text-align: center; font-size:8px;background:#0C344E;color:white;padding:0;margin:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a></div>`)
+    <a id="risPlusDownload" href="javascript:void(0);" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #6ECB63";">RIS+</a>
+    <a id="pdfDownload" href="javascript:void(0);" target="_blank" style="width:100%; height:30px; display: inline-block; line-height:30px; text-align: center;font-size:20px;color:white;text-decoration:none;padding:0;margin:0;background: #3B5194";>PDF</a>
+    <a id="doiCopy" href="javascript:void(0);" style="width:100%; height:30px; display: inline-block; line-height:30px; text-align: center;font-size:20px;color:white;text-decoration:none;padding:0;margin:0;background: #405F74";>DOI</a>
+    <a href="https://blog.cuger.cn" target="_blank" style="width:100%; height:30px; display: inline-block; line-height:30px; text-align: center; font-size:12px;background:#0C344E;color:white;padding:0;margin:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a>
+    </div>`)
     var css = {
         'line-height': '1.42857143',
         'font-family': '"Arial","微软雅黑","Helvetica,sans-serif","Microsoft YaHei"',
@@ -228,7 +231,7 @@ function generateTheButton(ris) {
         'margin': '0',
         'padding': '0',
         'width': '100px',
-        'height': '145px',
+        'height': '210px',
         'cursor': 'pointer',
         'position': 'fixed',
         'bottom': '10%',
@@ -249,12 +252,20 @@ function generateTheButton(ris) {
     if (ris == undefined) {
         key = 'SCI-RIS-Helper_NONE';
     } else {
+        // PDF
         const pdf = __getKeyFromRis(ris, 'L1');
         if (pdf !== undefined) {
+            $("#pdfDownload").attr("href", pdf);
             key = 'SCI-RIS-Helper_PDF';
         } else {
             key = 'SCI-RIS-Helper_RIS';
         }
+        // DOI
+        $("#doiCopy").click(function () {
+            const DOI = __getKeyFromRis(ris, 'DO');
+            navigator.clipboard.writeText(DOI);
+            Toast(navigator.language=='zh-CN'?'复制成功:'+DOI:'DOI:'+DOI, 1000);
+        })
     }
     function click(event) {
         // console.log(event);
@@ -271,17 +282,20 @@ function generateTheButton(ris) {
         case 'SCI-RIS-Helper_NONE':
             $("#noneDownload").css(radiusCSS);
             $("#risBox").css({
-                'height': '80px'
+                'height': '90px'
             });
+            $("#doiCopy").hide();
             $("#risDownload").hide();
+            $("#risPlusDownload").hide();
             $("#pdfDownload").hide();
             break;
         case 'SCI-RIS-Helper_RIS':
             $("#risDownload").css(radiusCSS);
             $("#noneDownload").hide();
+            $("#risPlusDownload").hide();
             $("#pdfDownload").hide();
             $("#risBox").css({
-                'height': '80px'
+                'height': '120px'
             });
             $("a#risDownload").click(click);
             break;
@@ -289,7 +303,7 @@ function generateTheButton(ris) {
             $("#risDownload").css(radiusCSS);
             $("#noneDownload").hide();
             $("a#risDownload").click(click);
-            $("a#pdfDownload").click(click);
+            $("a#risPlusDownload").click(click);
             break;
     }
     // print logo
@@ -610,6 +624,20 @@ function __setKeyForRis(ris, key, value) {
         ris = ris.slice(0, erIndex) + key + "  - " + value + "\n" + ris.slice(erIndex, ris.length);
     }
     return ris
+}
+
+//提示信息 封装
+function Toast(msg, duration) {
+    duration = isNaN(duration) ? 3000 : duration;
+    var m = document.createElement('div');
+    m.innerHTML = msg;
+    m.style.cssText = "font-size: 12px;color: rgb(255, 255, 255);background-color: rgba(0, 0, 0, 0.6);padding: 10px 15px;margin: 0 0 0 -60px;border-radius: 4px;position: fixed;    top: 50%;left: 50%;text-align: center;";
+    document.body.appendChild(m);
+    setTimeout(function () {
+        var d = 0.5;
+        m.style.opacity = '0';
+        setTimeout(function () { document.body.removeChild(m) }, d * 1000);
+    }, duration);
 }
 
 function printLogo() {
