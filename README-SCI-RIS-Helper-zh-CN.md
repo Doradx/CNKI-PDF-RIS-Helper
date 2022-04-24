@@ -1,7 +1,8 @@
 # SCI RIS Helper - EndNote+Sci-hub强强联合一键下载导入论文
-![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)
-![](https://img.shields.io/badge/dynamic/json?color=red&label=total%20installs&query=total_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&style=flat&logo=tampermonkey) 
-![](https://img.shields.io/badge/dynamic/json?color=green&label=daily%20installs&query=daily_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)
+![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey&link=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310)
+![](https://img.shields.io/badge/dynamic/json?color=red&label=total%20installs&query=total_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&style=flat&logo=tampermonkey&link=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310) 
+![](https://img.shields.io/badge/dynamic/json?color=green&label=daily%20installs&query=daily_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey&link=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310)
+![](https://img.shields.io/badge/blog-%40Dorad-blue??link=http://blog.cuger.cn&link=http://blog.cuger.cn)
 
 [Introduction - English](./README-SCI-RIS-Helper.md)
 

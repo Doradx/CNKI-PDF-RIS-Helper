@@ -1,11 +1,12 @@
+![](https://img.shields.io/github/stars/Doradx/CNKI-PDF-RIS-Helper?logo=github&link=https%3A%2F%2Fgithub.com%2FDoradx%2FCNKI-PDF-RIS-Helper%2Fstargazers)
+![](https://img.shields.io/github/forks/Doradx/CNKI-PDF-RIS-Helper?logo=github&link=https%3A%2F%2Fgithub.com%2FDoradx%2FCNKI-PDF-RIS-Helper%2Fnetwork)
+![](https://img.shields.io/github/last-commit/Doradx/CNKI-PDF-RIS-Helper?logo=github&link=https%3A%2F%2Fgithub.com%2FDoradx%2FCNKI-PDF-RIS-Helper%2Fcommits)
+![](https://img.shields.io/badge/blog-%40Dorad-blue??link=http://blog.cuger.cn)
+
 [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=views&color=blue&query=%24.data.stat.view)](https://www.bilibili.com/video/BV1Sv411u7fv)
 [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=coins&color=red&query=%24.data.stat.coin)](https://www.bilibili.com/video/BV1Sv411u7fv)
 [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=favorites&color=brightgreen&query=%24.data.stat.favorite
 )](https://www.bilibili.com/video/BV1Sv411u7fv)
-
-![](https://img.shields.io/github/stars/Doradx/CNKI-PDF-RIS-Helper?logo=github)
-![](https://img.shields.io/github/forks/Doradx/CNKI-PDF-RIS-Helper?logo=github)
-![](https://img.shields.io/github/last-commit/Doradx/CNKI-PDF-RIS-Helper?logo=github)
 
 ## SCI RIS Helper 
 ![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)
