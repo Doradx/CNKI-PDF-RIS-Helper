@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.9.19
+// @version      0.9.20
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -39,6 +39,7 @@
 // @connect      data.crosscite.org
 // @connect      mdpi.com
 // @connect      mdpi-res.com
+// @connect      serve.mdpi.com
 // @connect      ieeexplore.ieee.org
 // @connect      fjfsdata01prod.blob.core.windows.net
 // @match        *://www.webofscience.com/wos/*
@@ -183,8 +184,8 @@ function start() {
         METAS = getMeta();
         if (METAS && METAS.hasOwnProperty('doi') && METAS.doi) {
             clearInterval(Timer);
-            console.log('DOI FOUND!', METAS);
             // getRisFromCuger(METAS.doi)
+            // console.log('Final metas:', METAS);
             getRisFromOriginSite(METAS).then((ris) => {
                 RIS = ris;
             })
@@ -196,7 +197,7 @@ function start() {
                     METAS.title = risTitle ? risTitle : METAS.title;
                     // render
                     console.log('RIS:\n', RIS);
-                    console.log('METAS:\n', METAS);
+                    console.log('Final metas:', METAS);
                     generateTheButton(RIS, METAS);
                 })
         } else {
@@ -215,8 +216,8 @@ function generateTheButton(ris) {
     let sheet = $(`
     <div id="risBox">
     <a id="noneDownload" href="javascript:void(0);" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #6E7582";>NONE</a>
-    <a id="risDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #118ab2";>RIS</a>
-    <a id="pdfDownload" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #6ECB63";">RIS+</a>
+    <a id="risDownload" href="javascript:void(0);" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #118ab2";>RIS</a>
+    <a id="pdfDownload" href="javascript:void(0);" style="width:100%; height:60px; display: inline-block; line-height:60px; text-align: center;font-size:24px;color:white;text-decoration:none;padding:0;margin:0;background: #6ECB63";">RIS+</a>
     <a href="https://blog.cuger.cn" style="width:100%; height:25px; display: inline-block; line-height:28px; text-align: center; font-size:8px;background:#0C344E;color:white;padding:0;margin:0;border-bottom-left-radius:10px;border-bottom-right-radius:10px;text-decoration:none;">Dorad © ${year}</a></div>`)
     var css = {
         'line-height': '1.42857143',
@@ -245,34 +246,25 @@ function generateTheButton(ris) {
     $('body').append(sheet);
     $('div#risBox').css(css);
     let key = 'SCI-RIS-Helper_NONE'
-    // 不存在RIS
     if (ris == undefined) {
-        console.log('RIS not exist.');
+        key = 'SCI-RIS-Helper_NONE';
     } else {
-        const title = __getKeyFromRis(ris, 'TI') ? __getKeyFromRis(ris, 'TI') : __getKeyFromRis(ris, 'T1');
-        const doi = __getKeyFromRis(ris, 'DO');
         const pdf = __getKeyFromRis(ris, 'L1');
-
-        const fileName = title == undefined ? doi.replace("/", "@") : title
-        const risBlob = new Blob([__setKeyForRis(ris, 'L1', '')], {
-            type: "octet/stream"
-        });
-        const risUrl = URL.createObjectURL(risBlob);
-        var risDownloadName = fileName + "-none-pdf.ris";
-        $("#risDownload").attr("href", risUrl);
-        $("#risDownload").attr("download", risDownloadName);
-        key = 'SCI-RIS-Helper_RIS';
-
         if (pdf !== undefined) {
-            const risBlobWithPdf = new Blob([ris], {
-                type: "octet/stream"
-            });
-            const risWithPdfUrl = URL.createObjectURL(risBlobWithPdf);
-            var risWithPdfUrlDownloadName = fileName + "-pdf.ris";
-            $("#pdfDownload").attr("href", risWithPdfUrl);
-            $("#pdfDownload").attr("download", risWithPdfUrlDownloadName);
             key = 'SCI-RIS-Helper_PDF';
+        } else {
+            key = 'SCI-RIS-Helper_RIS';
         }
+    }
+    function click(event) {
+        // console.log(event);
+        if (event.currentTarget.id == 'risDownload') {
+            ris = __setKeyForRis(ris, 'L1', '')
+        }
+        const UF = generateRisBlob(ris);
+        $("#" + event.currentTarget.id).attr("href", UF.blob);
+        $("#" + event.currentTarget.id).attr("download", UF.name);
+        getCountFromCuger(key);
     }
     // set style according to key
     switch (key) {
@@ -291,16 +283,34 @@ function generateTheButton(ris) {
             $("#risBox").css({
                 'height': '80px'
             });
+            $("a#risDownload").click(click);
             break;
         case 'SCI-RIS-Helper_PDF':
             $("#risDownload").css(radiusCSS);
             $("#noneDownload").hide();
+            $("a#risDownload").click(click);
+            $("a#pdfDownload").click(click);
             break;
     }
-    getCountFromCuger(key);
     // print logo
     printLogo();
     return
+}
+
+function generateRisBlob(ris) {
+    const title = __getKeyFromRis(ris, 'TI') ? __getKeyFromRis(ris, 'TI') : __getKeyFromRis(ris, 'T1');
+    const doi = __getKeyFromRis(ris, 'DO');
+    const pdf = __getKeyFromRis(ris, 'L1');
+    const risBlob = new Blob([ris], {
+        type: "octet/stream"
+    });
+    const risUrl = URL.createObjectURL(risBlob);
+    var fileName = title == undefined ? doi.replace("/", "@") : title;
+    fileName += (pdf !== undefined && pdf !== '') ? "-pdf.ris" : "-none-pdf.ris";
+    return {
+        blob: risUrl,
+        name: fileName
+    }
 }
 
 // clear all button
@@ -328,11 +338,11 @@ function getMeta() {
         }
         let searchStr = 'meta[name="' + metaDict[key].join('"],meta[name="') + '"]';
         searchStr += ',meta[property="' + metaDict[key].join('"],meta[property="') + '"]';
-        console.log(searchStr);
+        // console.log(searchStr);
         let meta = $(searchStr);
         if (meta.length) {
             metas[key] = meta.attr("content");
-            console.log(`Get common meta, ${key} = ${meta.attr("content")}`);
+            // console.log(`Get common meta, ${key} = ${meta.attr("content")}`);
         }
     }
     // check doi using regrex
@@ -446,7 +456,7 @@ function __getPdfUrlFromScihub(doi) {
         } else {
             reject('Error to get the pdf url from sci-hub');
         }
-        console.log(pdfUrl)
+        // console.log(pdfUrl)
         resolve(pdfUrl);
     })
 }
@@ -685,17 +695,16 @@ function journalMetasAdaptor() {
                     // https://www.sciencedirect.com/science/article/pii/S0003682X21005727/pdfft?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
                     // https://www.sciencedirect.com/science/article/pii/PDFFT?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
                     const url = `https://www.sciencedirect.com/${p.path}/${p.pii}${p.pdfExtension}?md5=${p.queryParams.md5}&pid=${p.queryParams.pid}`;
-                    console.log(url);
+                    // console.log(url);
                     return __httpRequestPromise(url, 'GET', {}, {
                         'authority': 'www.sciencedirect.com',
                         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                         'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
                         // 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Edg/100.0.1185.29',
                     }, (resolve, reject, res) => {
-                        console.log(res)
+                        // console.log(res)
                         try {
                             let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
-                            console.log($('noscript', doc).html());
                             let pdfUrl = $('a', $('noscript', doc).html()).attr('href');
                             resolve(pdfUrl);
                         } catch (err) {
@@ -837,8 +846,8 @@ function journalMetasAdaptor() {
                         if (res.status !== 302 && res.status !== 200) {
                             reject('Error, Not 302 or 200.')
                         }
-                        console.log(res)
-                        console.log(`redirect from ${res.responseXML.URL} to ${res.finalUrl}`);
+                        // console.log(res)
+                        // console.log(`redirect from ${res.responseXML.URL} to ${res.finalUrl}`);
                         resolve(res.finalUrl);
                     })
                 }
@@ -881,6 +890,6 @@ function journalMetasAdaptor() {
     }
     if (metas.doi)
         metas.doi = decodeURIComponent(metas.doi);
-    console.log(metas);
+    console.log('Adapted metas:', metas);
     return metas;
 }
