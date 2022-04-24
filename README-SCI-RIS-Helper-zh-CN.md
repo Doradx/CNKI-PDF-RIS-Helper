@@ -7,6 +7,13 @@
 
 一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect和MDPI等80+种网站。
 
+# 特色
+- 一键下载最全面的Refman(*.ris)文件
+- 一键导入EndNote, 并自动下载关联pdf
+- 论文信息全面：URL、论文作者、DOI、期卷号、论文摘要。
+- 优先使用官方通道：优先使用出版商的接口获取Refman(*.ris)数据和官方PDF链接，若未找到才会调用crosscite和sci-hub数据。
+- 目前已适配80+个网站，理论上只要出现DOI的网站都可进行适配
+
 # 一、介绍
 本插件支持在下载**\*.ris**文件时自动关联sci-hub中的**pdf**链接，双击**\*.ris**文件将**自动下载pdf并进行关联**！
 
