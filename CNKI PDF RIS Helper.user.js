@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn/p/5187/
-// @version      0.6.9
+// @version      0.7.0
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
@@ -33,6 +33,7 @@
         const dbCode = document.getElementById('paramdbcode').value;
         const dbName = document.getElementById('paramdbname').value;
         const title = document.getElementsByClassName('wx-tit')[0].children[0].text;
+        const pdf = document.getElementById('pdfDown')?document.getElementById('pdfDown').href:null;
 
         // get cache
         let paper = getSearchCache(fileId);
@@ -43,6 +44,7 @@
                 dbName: dbName,
                 fileId: fileId,
                 title: title,
+                pdf: pdf
             }
         }
 
@@ -62,24 +64,24 @@
         butttonBoxs[0].append(risExportBtn);
         butttonBoxs[1].append(risExportBtnFixed);
         /** RIS+ */
-        // if (paper.hasOwnProperty('pdf')) {
-        //     let pdfUrl = await getPdfUrl(paper.pdf);
-        //     if (pdfUrl !== null) {
-        //         paper.pdfUrl = pdfUrl;
-        //     }
-        //     var risPlusExportBtnFixed = risExportBtn.cloneNode(true)
-        //     risPlusExportBtnFixed.innerHTML = '<a><i></i>RIS+</a>';
-        //     var exportRisPlusEvent = function () {
-        //         console.log('RIS+ Export: ' + title + ', ' + fileId + ', ' + dbName);
-        //         // downloadRisOfPaper(paper);
-        //         downloadByFilename(fileId, dbName, title, 'EndNote', paper.pdfUrl);
-        //     }
-        //     risPlusExportBtnFixed.onclick = exportRisPlusEvent;
-        //     butttonBoxs[0].append(risPlusExportBtnFixed);
-        // }
+        if (paper.hasOwnProperty('pdf') && document.domain.indexOf('oversea')>-1) {
+            let pdfUrl = await getPdfUrl(paper.pdf);
+            if (pdfUrl !== null) {
+                paper.pdfUrl = pdfUrl;
+            }
+            var risPlusExportBtnFixed = risExportBtn.cloneNode(true)
+            risPlusExportBtnFixed.innerHTML = '<a><i></i>RIS+</a>';
+            var exportRisPlusEvent = function () {
+                console.log('RIS+ Export: ' + title + ', ' + fileId + ', ' + dbName);
+                // downloadRisOfPaper(paper);
+                downloadByFilename(fileId, dbName, title, 'EndNote', paper.pdfUrl);
+            }
+            risPlusExportBtnFixed.onclick = exportRisPlusEvent;
+            butttonBoxs[0].append(risPlusExportBtnFixed);
+        }
         /** PDF button for Thesis */
         console.log(['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf'));
-        if (['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf')) {
+        if (['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf') && document.domain.indexOf('oversea')==-1) {
             var pdfDownloadBtn = risExportBtn.cloneNode(true)
             const pdfUrl = "https://" + document.domain + paper.pdf;
             pdfDownloadBtn.innerHTML = "<a href=" + pdfUrl + " target='_blank'><i></i>PDF下载</a>";
@@ -143,11 +145,11 @@ function updateRowItems() {
                 if (operats.getElementsByClassName('icon-html').length) {
                     exportBtnClassName = 'icon-html'
                 }
-                var exportRisPlus = operats.getElementsByClassName(exportBtnClassName)[0];
-                exportRisPlus.title = 'RIS';
-                exportRisPlus.removeAttribute('target');
-                exportRisPlus.removeAttribute('href');
-                exportRisPlus.onclick = function () {
+                var exportRis = operats.getElementsByClassName(exportBtnClassName)[0];
+                exportRis.title = 'RIS';
+                exportRis.removeAttribute('target');
+                exportRis.removeAttribute('href');
+                exportRis.onclick = function () {
                     // console.log('RIS Export: ' + title + ', ' + fileId + ', ' + dbName);
                     downloadRisOfPaper({
                         dbName: dbName,
@@ -156,17 +158,23 @@ function updateRowItems() {
                         // pdf: pdf
                     });
                 }
-                // // RIS
-                // if(pdf!==null){
-                //     var exportRis = exportRisPlus.cloneNode(true);
-                //     exportRis.title='RIS';
-                //     exportRis.onclick = function(){
-                //         downloadByFilename(fileId, dbName, title, 'EndNote');
-                //     }
-                //     console.log(exportRis);
-                //     operats.append(exportRis);
-                //     // operats.insertBefore(exportRis, exportRis);
-                // }
+                // RIS+
+                if(pdf!==null && document.domain.indexOf('oversea')>-1){
+                    var exportRisPlus = exportRis.cloneNode(true);
+                    exportRisPlus.title='RIS+';
+                    exportRisPlus.onclick = function(){
+                        downloadRisOfPaper({
+                            dbName: dbName,
+                            fileId: fileId,
+                            title: title,
+                            pdf: pdf
+                        });
+                    }
+                    console.log(exportRisPlus);
+                    operats.append(exportRisPlus);
+                    operats.removeChild(operats.getElementsByClassName('icon-quote')[0]);
+                    operats.insertBefore(exportRisPlus, exportRis);
+                }
             }
             row.setAttribute('ris', true);
             paperList.push({
@@ -283,7 +291,7 @@ function downloadByFilename(fileId, dbName, name, type = 'EndNote', pdfUrl = und
                 // console.log(text);
                 // add PDF URL if exist
                 if (pdfUrl !== undefined) {
-                    text += "\r\n%> " + pdfUrl;
+                    text += "%> " + pdfUrl;
                 }
                 console.log(text);
                 a.href = 'data:application/x-EndNote-tagged; charset=utf-8,' + encodeURIComponent(text);
