@@ -33,21 +33,22 @@
         const dbCode = document.getElementById('paramdbcode').value;
         const dbName = document.getElementById('paramdbname').value;
         const title = document.getElementsByClassName('wx-tit')[0].children[0].text;
-        const pdf = document.getElementById('pdfDown')?document.getElementById('pdfDown').href:null;
+        const pdf = document.getElementById('pdfDown') ? document.getElementById('pdfDown').href : null;
 
-        // get cache
-        let paper = getSearchCache(fileId);
-        console.log(paper);
-
-        if (!paper) {
-            paper = {
-                dbName: dbName,
-                fileId: fileId,
-                title: title,
-                pdf: pdf
-            }
+        var paper = {
+            dbName: document.getElementById('paramdbname').value,
+            dbCode: document.getElementById('paramdbcode').value,
+            fileId: document.getElementById('paramfilename').value,
+            title: document.getElementsByClassName('wx-tit')[0].children[0].text,
+            pdf: document.getElementById('pdfDown') ? document.getElementById('pdfDown').href : null
         }
 
+        // get cache
+        let paperCache = getSearchCache(fileId);
+        // merge paper data
+        if (paperCache && !paper.hasOwnProperty('pdf')) {
+            paper = Object.assign(paper, paperCache);
+        }
         console.log(paper);
 
         var risExportBtn = document.createElement('li');
@@ -64,13 +65,13 @@
         butttonBoxs[0].append(risExportBtn);
         butttonBoxs[1].append(risExportBtnFixed);
         /** RIS+ */
-        if (paper.hasOwnProperty('pdf') && document.domain.indexOf('oversea')>-1) {
+        if (paper.hasOwnProperty('pdf') && document.domain.indexOf('oversea') > -1) {
             let pdfUrl = await getPdfUrl(paper.pdf);
             if (pdfUrl !== null) {
                 paper.pdfUrl = pdfUrl;
             }
             var risPlusExportBtnFixed = risExportBtn.cloneNode(true)
-            risPlusExportBtnFixed.innerHTML = '<a><i></i>RIS+</a>';
+            risPlusExportBtnFixed.innerHTML = '<a><i></i>RIS+(test)</a>';
             var exportRisPlusEvent = function () {
                 console.log('RIS+ Export: ' + title + ', ' + fileId + ', ' + dbName);
                 // downloadRisOfPaper(paper);
@@ -81,7 +82,7 @@
         }
         /** PDF button for Thesis */
         console.log(['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf'));
-        if (['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf') && document.domain.indexOf('oversea')==-1) {
+        if (['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf') && document.domain.indexOf('oversea') == -1) {
             var pdfDownloadBtn = risExportBtn.cloneNode(true)
             const pdfUrl = "https://" + document.domain + paper.pdf;
             pdfDownloadBtn.innerHTML = "<a href=" + pdfUrl + " target='_blank'><i></i>PDF下载</a>";
@@ -159,10 +160,10 @@ function updateRowItems() {
                     });
                 }
                 // RIS+
-                if(pdf!==null && document.domain.indexOf('oversea')>-1){
+                if (pdf !== null && document.domain.indexOf('oversea') > -1) {
                     var exportRisPlus = exportRis.cloneNode(true);
-                    exportRisPlus.title='RIS+';
-                    exportRisPlus.onclick = function(){
+                    exportRisPlus.title = 'RIS+';
+                    exportRisPlus.onclick = function () {
                         downloadRisOfPaper({
                             dbName: dbName,
                             fileId: fileId,
