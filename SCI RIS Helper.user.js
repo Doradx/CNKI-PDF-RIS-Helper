@@ -124,6 +124,7 @@
 // @match        *://www.ncbi.nlm.nih.gov/pmc/articles/*
 // @match        *://qjegh.lyellcollection.org/content/*
 // @match        *://cdnsciencepub.com/doi/*
+// @match        *://ojs.aaai.org//index.php/AAAI/article/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -399,7 +400,9 @@ function getRisFromOriginSite(metas) {
                     } else {
                         let r = res[1].value;
                         for (var key of __getRisKeys(r)) {
-                            ris = __setKeyForRis(ris, key, __getKeyFromRis(r, key))
+                            if(__getKeyFromRis(ris, key)==undefined || __getKeyFromRis(ris, key)==''){
+                                ris = __setKeyForRis(ris, key, __getKeyFromRis(r, key))
+                            }
                         }
                     }
                 }
@@ -407,7 +410,7 @@ function getRisFromOriginSite(metas) {
                 if (res[3].status == 'fulfilled' && res[3].value !==undefined) {
                     metas.pdf = res[3].value;
                 }
-                if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || metas.pdf==undefined || PDF_SCIHUB_FIRST)) {
+                if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || PDF_SCIHUB_FIRST)) {
                     metas.pdf = res[2].value;
                 }
 
@@ -603,6 +606,7 @@ function __getRisKeys(ris) {
         keys.push(m[1])
         m = reg.exec(ris);
     }
+    keys.splice(keys.indexOf('ER'),1)
     // console.log(keys);
     return keys;
 }
@@ -620,7 +624,7 @@ function __setKeyForRis(ris, key, value) {
     if (ris.match(RegExp(key + '  \- (.*)[\r]{0,1}\n'))) {
         ris = ris.replace(RegExp(key + '  \- (.*)[\r]{0,1}\n'), key + '  - ' + value + '\n')
     } else {
-        const erIndex = ris.indexOf('ER  - ');
+        const erIndex = ris.indexOf('ER  -');
         ris = ris.slice(0, erIndex) + key + "  - " + value + "\n" + ris.slice(erIndex, ris.length);
     }
     return ris
@@ -911,6 +915,32 @@ function journalMetasAdaptor() {
                 metas.pdf = $('li.pdf-link a').attr("href");
                 if (metas.pdf.indexOf('http') == -1)
                     metas.pdf = window.location.origin + metas.pdf
+            case 'ojs.aaai.org':
+                metas.risUrl = $('a[href^="https://ojs.aaai.org/index.php/AAAI/citationstylelanguage/download/ris"]').attr("href");
+                metas.risPromise = function (metas) {
+                    // console.log(metas);
+                    return __httpRequestPromise(metas.risUrl, 'GET', {}, {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }, (resolve, reject, res) => {
+                        // console.log(res)
+                        let ris = res.responseText;
+                        if (ris.match(/<html>[\s\S]*<\/html>/))
+                            reject('Error format');
+                        resolve(ris);
+                    })
+                }
+                // metas.pdf = $('meta[name="citation_pdf_url"]').attr("content");
+                metas.pdfPromise = function (metas) {
+                    return new Promise((resolve,reject)=>{
+                        var pdf = $('meta[name="citation_pdf_url"]').attr("content");
+                        if(pdf.indexOf('download')){
+                            resolve(pdf)
+                        }else{
+                            reject('No pdf url found in the origin site')
+                        }
+                    })
+                }
+                break;
             default:
         }
     } catch (error) {
