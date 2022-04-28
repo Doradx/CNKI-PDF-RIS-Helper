@@ -33,14 +33,15 @@
         const dbCode = document.getElementById('paramdbcode').value;
         const dbName = document.getElementById('paramdbname').value;
         const title = document.getElementsByClassName('wx-tit')[0].children[0].text;
-        const pdf = document.getElementById('pdfDown') ? document.getElementById('pdfDown').href : null;
-
+        var pdf = document.getElementById('pdfDown') ? document.getElementById('pdfDown').href : null;
         var paper = {
             dbName: document.getElementById('paramdbname').value,
             dbCode: document.getElementById('paramdbcode').value,
             fileId: document.getElementById('paramfilename').value,
             title: document.getElementsByClassName('wx-tit')[0].children[0].text,
-            pdf: document.getElementById('pdfDown') ? document.getElementById('pdfDown').href : null
+        }
+        if((['CDFD', 'CMFD'].indexOf(dbCode) < 0 || document.domain.indexOf('oversea')>-1) && pdf!==null){
+            paper.pdf = pdf;
         }
 
         // get cache
@@ -84,7 +85,7 @@
         console.log(['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf'));
         if (['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf') && document.domain.indexOf('oversea') == -1) {
             var pdfDownloadBtn = risExportBtn.cloneNode(true)
-            const pdfUrl = "https://" + document.domain + paper.pdf;
+            const pdfUrl = paper.pdf.indexOf('http')>-1? paper.pdf:"https://" + document.domain + paper.pdf;
             pdfDownloadBtn.innerHTML = "<a href=" + pdfUrl + " target='_blank'><i></i>PDF下载</a>";
             // pdfDownloadBtn.setAttribute("href", "https://"+document.domain+paper.pdf);
             butttonBoxs[0].append(pdfDownloadBtn);
