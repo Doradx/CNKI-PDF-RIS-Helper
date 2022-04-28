@@ -404,10 +404,10 @@ function getRisFromOriginSite(metas) {
                     }
                 }
                 // PDF url
-                if (res[3].status == 'fulfilled') {
+                if (res[3].status == 'fulfilled' && res[3].value !==undefined) {
                     metas.pdf = res[3].value;
                 }
-                if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || PDF_SCIHUB_FIRST)) {
+                if (res[2].status == 'fulfilled' && (!metas.hasOwnProperty('pdf') || metas.pdf==undefined || PDF_SCIHUB_FIRST)) {
                     metas.pdf = res[2].value;
                 }
 
