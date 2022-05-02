@@ -125,6 +125,7 @@
 // @match        *://qjegh.lyellcollection.org/content/*
 // @match        *://cdnsciencepub.com/doi/*
 // @match        *://ojs.aaai.org//index.php/AAAI/article/*
+// @match        *://www.ijcai.org/proceedings/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -941,6 +942,27 @@ function journalMetasAdaptor() {
                     })
                 }
                 break;
+            case 'www.ijcai.org':
+                metas.doi = $('a.doi').attr('href');
+                metas.pdfPromise = function (metas) {
+                    return new Promise((resolve,reject)=>{
+                        var pdf = $('a.button[href$=".pdf"]').attr('href');
+                        console.log(pdf);
+                        if(pdf.indexOf('download')>-1){
+                            resolve(pdf)
+                        }else{
+                            reject('No pdf url found in the origin site')
+                        }
+                    })
+                }
+            case 'arxiv.org':
+                metas.pdfPromise = function (metas) {
+                    return new Promise((resolve,reject)=>{
+                        var pdf = $('a[href*="pdf"]').attr('href');
+                        pdf = 'https://arxiv.org/' + pdf + '.pdf'
+                        resolve(pdf);
+                    })
+                }
             default:
         }
     } catch (error) {
