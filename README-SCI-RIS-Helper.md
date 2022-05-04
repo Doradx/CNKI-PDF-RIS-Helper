@@ -1,8 +1,5 @@
 # SCI RIS Helper - EndNote+Scihub
-[![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310)
-[![](https://img.shields.io/badge/dynamic/json?color=red&label=total%20installs&query=total_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&style=flat&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310)
-[![](https://img.shields.io/badge/dynamic/json?color=green&label=daily%20installs&query=daily_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310)
-[![](https://img.shields.io/badge/blog-%40Dorad-blue)](https://blog.cuger.cn)
+[![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/dynamic/json?color=red&label=total%20installs&query=total_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&style=flat&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/dynamic/json?color=green&label=daily%20installs&query=daily_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/blog-%40Dorad-blue)](https://blog.cuger.cn)
 
 This script is written to find the pdf link to the article when the Refman file is downloaded. The pdf file will then be automatically downloaded and associated with the reference when being imported into EndNote.
 
