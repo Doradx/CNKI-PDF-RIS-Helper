@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.10.0
+// @version      0.10.1
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -511,7 +511,7 @@ function __getScihubHost() {
 
 function __pingHost(host) {
     return new Promise(async (resolve, reject) => {
-        return __httpRequestPromise(host + 'favicon.ico', 'GET', {}, {}, (r, j, res) => {
+        return __httpRequestPromise(host, 'GET', {}, {}, (r, j, res) => {
             r(res);
         })
             .then(() => {
