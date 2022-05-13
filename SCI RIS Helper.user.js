@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.10.1
+// @version      0.10.2
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -42,7 +42,7 @@
 // @connect      serve.mdpi.com
 // @connect      ieeexplore.ieee.org
 // @connect      fjfsdata01prod.blob.core.windows.net
-// @match        *://www.webofscience.com/wos/*
+// @include      /^http[s]?:\/\/[\S\s]+webofscience[\S\s]+$/
 // @match        *://www.scirp.org/journal/*
 // @match        *://direct.mit.edu/neco/*
 // @match        *://ieeexplore.ieee.org/*document/*
@@ -671,7 +671,13 @@ function journalMetasAdaptor() {
      * all the non standard journal
      */
     try {
-        switch (window.location.host) {
+        let host = window.location.href.match(`^http[s]?:\/\/(.*?)\/`)[1];
+        // host translate
+        if(host.indexOf('webofscience')>-1){
+            host = 'www.webofscience.com';
+        }
+        console.log(host);
+        switch (host) {
             case 'ieeexplore.ieee.org':
                 metas.title = $('meta[property="twitter:title"]').attr("content");
                 metas.doi = $('div.stats-document-abstract-doi a').text();
