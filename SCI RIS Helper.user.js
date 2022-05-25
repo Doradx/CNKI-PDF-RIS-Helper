@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.10.3
+// @version      0.10.4
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -141,7 +141,7 @@ const SCI_HUB_HOST = [
 let bestScihubHost = SCI_HUB_HOST[0];
 
 const PDF_SCIHUB_FIRST = false; // SCI-HUB or JOURNAL first
-const MaxRetryTimes = 5;
+const MaxRetryTimes = 25;
 
 let METAS;
 let RIS;
