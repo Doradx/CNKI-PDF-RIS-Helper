@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.10.4
+// @version      0.10.5
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -729,29 +729,29 @@ function journalMetasAdaptor() {
                         resolve(ris);
                     })
                 }
-                metas.pdfPromise = function (metas) {
-                    const p = metas.pdfDownload.urlMetadata;
-                    // const url = $('a.accessbar-primary-link').attr('href');
-                    // https://www.sciencedirect.com/science/article/pii/S0003682X21005727/pdfft?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
-                    // https://www.sciencedirect.com/science/article/pii/PDFFT?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
-                    const url = `https://www.sciencedirect.com/${p.path}/${p.pii}${p.pdfExtension}?md5=${p.queryParams.md5}&pid=${p.queryParams.pid}`;
-                    // console.log(url);
-                    return __httpRequestPromise(url, 'GET', {}, {
-                        'authority': 'www.sciencedirect.com',
-                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                        'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
-                        // 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Edg/100.0.1185.29',
-                    }, (resolve, reject, res) => {
-                        // console.log(res)
-                        try {
-                            let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
-                            let pdfUrl = $('a', $('noscript', doc).html()).attr('href');
-                            resolve(pdfUrl);
-                        } catch (err) {
-                            reject(err);
-                        }
-                    })
-                }
+                // metas.pdfPromise = function (metas) {
+                //     const p = metas.pdfDownload.urlMetadata;
+                //     // const url = $('a.accessbar-primary-link').attr('href');
+                //     // https://www.sciencedirect.com/science/article/pii/S0003682X21005727/pdfft?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
+                //     // https://www.sciencedirect.com/science/article/pii/PDFFT?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
+                //     const url = `https://www.sciencedirect.com/${p.path}/${p.pii}${p.pdfExtension}?md5=${p.queryParams.md5}&pid=${p.queryParams.pid}`;
+                //     // console.log(url);
+                //     return __httpRequestPromise(url, 'GET', {}, {
+                //         'authority': 'www.sciencedirect.com',
+                //         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                //         'accept-language': 'en-CN,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
+                //         // 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36 Edg/100.0.1185.29',
+                //     }, (resolve, reject, res) => {
+                //         // console.log(res)
+                //         try {
+                //             let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
+                //             let pdfUrl = $('a', $('noscript', doc).html()).attr('href');
+                //             resolve(pdfUrl);
+                //         } catch (err) {
+                //             reject(err);
+                //         }
+                //     })
+                // }
                 break;
             }
             case 'pubs.acs.org':
