@@ -20,5 +20,13 @@ https://chn.oversea.cnki.net/
 1. 由于国内知网版本更新，目前已无法在详情页下载PDF版本的硕博论文
 2. 测试结果表明，当摘要字数过多时，导入EndNote中会导致摘要乱码，在导入硕博论文时需要注意。测试软件为EndNote X9.3.3 on Windows 10。
 
+# 捐赠记录
+| ID   | AMOUNT |
+| ---- | ------ |
+| *达  | ￥10   |
+| Z*l | ￥ 5   |
+| a*s | ￥ 10   |
+| 西*D | ￥ 10   |
+
 # 作者
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com

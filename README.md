@@ -27,6 +27,7 @@
 | *达  | ￥10   |
 | Z*l | ￥ 5   |
 | a*s | ￥ 10   |
+| 西*D | ￥ 10   |
 
 ![](https://blog.cuger.cn/images/pay.jpg)
 

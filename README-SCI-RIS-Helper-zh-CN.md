@@ -118,6 +118,7 @@ Citavi 6 测试结果表明，在导入过程中，其不会自动下载，但�
 | *达  | ￥10   |
 | Z*l | ￥ 5   |
 | a*s | ￥ 10   |
+| 西*D | ￥ 10   |
 
 ![](https://blog.cuger.cn/images/pay.jpg)
 
