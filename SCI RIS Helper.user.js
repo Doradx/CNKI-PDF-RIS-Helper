@@ -4,15 +4,15 @@
 // @name:de      SCI RIS Helper - EndNote+Scihub
 // @name:ja      SCI RIS Helper - EndNote+Scihub
 // @name:es      SCI RIS Helper - EndNote+Scihub
-// @description  Download the Refman(*.ris) with pdf URL queried from Sci-hub. Supported 80+ sites include Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPI, etc. Just see: https://blog.cuger.cn/p/63499/
-// @description:zh-CN 一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect和MDPI等80+种网站。
-// @description:de Laden Sie den Refman(*.ris) mit der von Sci-hub abgefragten pdf-URL herunter. Zu den über 80 unterstützten Websites gehören Web of Science, Researchgate, Springer, ScienceDirect, IEEE, MDPI usw.
-// @description:ja Refman(*.ris)のpdf URLをSci-hubから照会してダウンロードします。Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPIなど、80以上のサイトに対応しています。
-// @description:es Laadige Refman(*.ris) alla Sci-hubist küsitud pdf URL-iga. Toetatud 80+ saidi hulka kuuluvad Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPI jne.
+// @description  Download the Refman(*.ris) with pdf URL queried from Sci-hub. Supported 80+ sites include Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPI, Scopus, etc. Just see: https://blog.cuger.cn/p/63499/
+// @description:zh-CN 一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect、Scopus和MDPI等80+种网站。
+// @description:de Laden Sie den Refman(*.ris) mit der von Sci-hub abgefragten pdf-URL herunter. Zu den über 80 unterstützten Websites gehören Web of Science, Researchgate, Springer, ScienceDirect, IEEE, MDPI, Scopus usw.
+// @description:ja Refman(*.ris)のpdf URLをSci-hubから照会してダウンロードします。Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPI, Scopus など、80以上のサイトに対応しています。
+// @description:es Laadige Refman(*.ris) alla Sci-hubist küsitud pdf URL-iga. Toetatud 80+ saidi hulka kuuluvad Web of science, Researchgate, Springer, ScienceDirect, IEEE, MDPI, Scopus jne.
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.10.6
+// @version      0.11.0
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -127,6 +127,7 @@
 // @match        *://cdnsciencepub.com/doi/*
 // @match        *://ojs.aaai.org//index.php/AAAI/article/*
 // @match        *://www.ijcai.org/proceedings/*
+// @match        *://www.scopus.com/record/display.uri*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -981,6 +982,10 @@ function journalMetasAdaptor() {
                         resolve(pdf);
                     })
                 }
+                break;
+            case 'www.scopus.com':
+                metas.abstract =  $("els-typography[id='abstract']").next().find('span').text();
+                break;
             default:
         }
     } catch (error) {

@@ -3,7 +3,7 @@
 
 [Introduction - English](./README-SCI-RIS-Helper.md)
 
-一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect和MDPI等80+种网站。
+一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect、Scopus和MDPI等80+种网站。
 
 # 特色
 - 一键下载最全面的Refman(*.ris)文件
