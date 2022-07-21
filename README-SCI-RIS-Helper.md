@@ -17,7 +17,7 @@ This script will generate a floating button in the button right corner of the pa
 - **Only RIS**: **RIS** is available, **PDF** is unavailable, click the button to download the **RIS** file, but **PDF URL** can't be attached automatically. 
 - **NONE**: if both **RIS** and **PDF** are unavailable, the button is disabled. 
 
-![Button Status](https://user-images.githubusercontent.com/23170065/139387996-7860ce79-5768-4193-9237-5829d09cb757.png)
+![Button Status](./images/Button%20in%203%20states.png)
 
 # Runtime
 

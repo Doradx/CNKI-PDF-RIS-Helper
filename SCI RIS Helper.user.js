@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.11.0
+// @version      0.11.1
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -128,6 +128,7 @@
 // @match        *://ojs.aaai.org//index.php/AAAI/article/*
 // @match        *://www.ijcai.org/proceedings/*
 // @match        *://www.scopus.com/record/display.uri*
+// @match        *://avs.scitation.org/doi/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -735,8 +736,8 @@ function journalMetasAdaptor() {
                 //     // const url = $('a.accessbar-primary-link').attr('href');
                 //     // https://www.sciencedirect.com/science/article/pii/S0003682X21005727/pdfft?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
                 //     // https://www.sciencedirect.com/science/article/pii/PDFFT?md5=7a4fbef5c55adb19a2caf8e20ff2bb02&pid=1-s2.0-S0003682X21005727-main.pdf
-                //     const url = `https://www.sciencedirect.com/${p.path}/${p.pii}${p.pdfExtension}?md5=${p.queryParams.md5}&pid=${p.queryParams.pid}`;
-                //     // console.log(url);
+                //     const url = `https://www.sciencedirect.com/${p.path}/${p.pii}${p.pdfExtension}?md5=${p.queryParams.md5}&pid=${p.queryParams.pid}&isDTMRedir=Y`;
+                //     console.log(url);
                 //     return __httpRequestPromise(url, 'GET', {}, {
                 //         'authority': 'www.sciencedirect.com',
                 //         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -984,7 +985,10 @@ function journalMetasAdaptor() {
                 }
                 break;
             case 'www.scopus.com':
-                metas.abstract =  $("els-typography[id='abstract']").next().find('span').text();
+                metas.abstract = $("els-typography[id='abstract']").next().find('span').text();
+                break;
+            case 'avs.scitation.org':
+                metas.abstract = $('meta[name="citation_abstract"]').attr("content");
                 break;
             default:
         }

@@ -23,7 +23,7 @@
 - **RIS**: 找到了**Refman**，但未找到**PDF**，点击**RIS**将下载RIS文件，双击即可导入EndNote，但是不会关联PDF。
 - **NONE**: 啥也没找到，不支持该页面，按钮禁用。
 
-![三种不同状态](https://i.cuger.cn/b/ad744dc87acf8eb2568166dcf1279e62.png)
+![三种不同状态](./images/Button%20in%203%20states.png)
 
 如果在期刊页面未显示图标，则表明暂未适配该期刊。可将网址提交在**评论区**，博主空闲时随缘更新。
 
@@ -67,13 +67,13 @@ EndNote博主使用的X9.3.3版本，完美使用！
 Citavi 6 测试结果表明，在导入过程中，其不会自动下载，但是会保存论文PDF链接。
 
 预览窗口"Always preview this location immediately"将会自动下载预览，点击"Save a copy in this project"将在本地存储备份。
-![Citavi 6 导入结果](https://i.cuger.cn/img/57d8f18e8511429ed9c663a96cec5114.png?imageMogr2/thumbnail/800x)
+![Citavi 6 导入结果](./images/Citavi%206.png)
 
 ## 3. NoteExpress
 
 经测（NoteExpress），可以成功导入，并导入PDF链接，但是不会自动下载PDF, 需要点击链接自行下载。
 
-![NoteExpress导入情况](https://i.cuger.cn/b/14e14eb07e338279837380d4f444e32f.png)
+![NoteExpress导入情况](./images/NoteExpress.png)
 
 # 四、其它
 
