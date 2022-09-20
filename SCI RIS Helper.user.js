@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.11.2
+// @version      0.11.4
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -129,7 +129,7 @@
 // @match        *://www.ijcai.org/proceedings/*
 // @match        *://www.scopus.com/record/display.uri*
 // @match        *://avs.scitation.org/doi/*
-// @match        *://onepetro.org/*/article-abstract/*
+// @include      /^http[s]?:\/\/[\S\s]*onepetro.org/[\S\s]+/(article|proceedings)/
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -404,7 +404,8 @@ function getRisFromOriginSite(metas) {
                         ris = res[1].value;
                     } else {
                         let r = res[1].value;
-                        for (var key of __getRisKeys(r)) {
+                        let risKeys = __getRisKeys(r);
+                        for (var key of risKeys) {
                             if (__getKeyFromRis(ris, key) == undefined || __getKeyFromRis(ris, key) == '') {
                                 ris = __setKeyForRis(ris, key, __getKeyFromRis(r, key))
                             }
@@ -419,7 +420,13 @@ function getRisFromOriginSite(metas) {
                     metas.pdf = res[2].value;
                 }
 
-                // console.log('updated metas', metas);
+                console.log('updated metas', metas);
+                // ris = ris.replace(/(?!\n)(AU|TI)  - /ig, "\n$1  - ");
+                // formate ris
+                const regstr = "(?!\\n)("+__getRisKeys(ris).join('|')+")[ ]{1,3}- ";
+                console.log(regstr)
+                ris = ris.replace(new RegExp(regstr,'ig'), "\n$1  - ");
+                ris = ris.replace(/(\n){2,}/ig,'\n');
                 // update abstract
                 if (ris && ris.indexOf('N2  - ') < 0 && ris.indexOf('AB  - ') < 0 && metas.hasOwnProperty('abstract') && metas.abstract.length) {
                     ris = __setKeyForRis(ris, 'N2', metas.abstract)
@@ -433,6 +440,7 @@ function getRisFromOriginSite(metas) {
                 // push update to cuger.cn
                 if (__getKeyFromRis(ris, 'L1'))
                     pushRisToCuger(metas.doi, ris);
+                console.log(ris);
                 resolve(ris);
             })
             .catch((err) => {
@@ -604,7 +612,7 @@ function __httpRequestPromise(url, method = 'GET', data = null, headers = null, 
 function __getRisKeys(ris) {
     if (!ris)
         return undefined;
-    const reg = /^(\w+)  \- .*[\r]{0,1}$/gm
+    const reg = /^(\w+)[ ]+\- .*[\r]{0,1}$/gm
     var m = reg.exec(ris);
     var keys = [];
     while (m) {
@@ -612,7 +620,6 @@ function __getRisKeys(ris) {
         m = reg.exec(ris);
     }
     keys.splice(keys.indexOf('ER'), 1)
-    // console.log(keys);
     return keys;
 }
 
@@ -890,7 +897,9 @@ function journalMetasAdaptor() {
                         let ris = res.responseText;
                         if (ris.match(/<html>[\s\S]*<\/html>/))
                             reject('Error format');
-                        ris += '\r\nER  - ';
+                        // ris += '\r\nER  - ';
+                        ris = ris.replace(/(AU|TI)  -/ig,'\n$1  -');
+                        //console.log(ris);
                         resolve(ris);
                     })
                 }
