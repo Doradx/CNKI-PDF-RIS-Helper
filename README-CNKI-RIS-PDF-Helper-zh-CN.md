@@ -28,6 +28,7 @@ https://chn.oversea.cnki.net/
 | a*s | ￥ 10   |
 | 西*D | ￥ 10   |
 | F*g | ￥ 10 |
+| J*y | ￥ 15 |
 
 # 作者
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com

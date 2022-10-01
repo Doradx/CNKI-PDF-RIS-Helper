@@ -55,6 +55,7 @@ If this script helps you, you can support me with a coffee.
 | a*s | ￥ 10   |
 | 西*D | ￥ 10   |
 | F*g | ￥ 10 |
+| J*y | ￥ 15 |
 
 # Author
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com

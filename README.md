@@ -29,6 +29,7 @@
 | a*s | ￥ 10   |
 | 西*D | ￥ 10   |
 | F*g | ￥ 10 |
+| J*y | ￥ 15 |
 
 ![](https://blog.cuger.cn/images/pay.jpg)
 
