@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.11.4
+// @version      0.11.5
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -129,6 +129,7 @@
 // @match        *://www.ijcai.org/proceedings/*
 // @match        *://www.scopus.com/record/display.uri*
 // @match        *://avs.scitation.org/doi/*
+// @match        *://pubs.rsc.org/*/content/article*
 // @include      /^http[s]?:\/\/[\S\s]*onepetro.org/[\S\s]+/(article|proceedings)/
 // ==/UserScript==
 
