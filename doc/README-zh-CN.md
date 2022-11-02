@@ -2,27 +2,26 @@
 
 [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=views&color=blue&query=%24.data.stat.view)](https://www.bilibili.com/video/BV1Sv411u7fv) [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=coins&color=red&query=%24.data.stat.coin)](https://www.bilibili.com/video/BV1Sv411u7fv) [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=favorites&color=brightgreen&query=%24.data.stat.favorite)](https://www.bilibili.com/video/BV1Sv411u7fv)
 
-# SCI RIS Helper [中文版](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/doc/README-SCI-RIS-Helper-zh-CN.md)
+## SCI RIS Helper
 [![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/dynamic/json?color=red&label=total%20installs&query=total_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&style=flat&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/dynamic/json?color=green&label=daily%20installs&query=daily_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310)
 
-[Introduction](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/doc/README-CNKI-RIS-PDF-Helper-zh-CN.md) [Blog](https://blog.cuger.cn/p/63499/) [Greasyfork](https://greasyfork.org/en/scripts/434310)
+[详细介绍](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/doc/README-SCI-RIS-Helper-zh-CN.md)  [安装链接](https://greasyfork.org/en/scripts/434310) [博客介绍](https://blog.cuger.cn/p/63499/) [Introduction](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/doc/README-SCI-RIS-Helper.md)
 
-Download the Refman(*.ris) with the pdf URL queried from Sci-hub. Supported 80+ sites including Web of Science, Researchgate, Springer, ScienceDirect, IEEE, MDPI, Scopus, etc. Just see: https://blog.cuger.cn/p/63499/
+一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect和MDPI等80+种网站。
 
-# CNKI RIS Helper [中文版](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/doc/README-CNKI-RIS-PDF-Helper-zh-CN.md)
+## CNKI RIS Helper 
 [![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F425133.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/425133) [![](https://img.shields.io/badge/dynamic/json?color=red&label=total%20installs&query=total_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F425133.json&style=flat&logo=tampermonkey)](https://greasyfork.org/en/scripts/425133) [![](https://img.shields.io/badge/dynamic/json?color=green&label=daily%20installs&query=daily_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F425133.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/425133)
 
-[Introduction](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/doc/README-CNKI-RIS-PDF-Helper-zh-CN.md) [Blog](https://blog.cuger.cn/p/5187/) [Greasyfork](https://greasyfork.org/en/scripts/425133)  
+[详细介绍](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/doc/README-CNKI-RIS-PDF-Helper-zh-CN.md)  [安装链接](https://greasyfork.org/en/scripts/425133)  [博客介绍](https://blog.cuger.cn/p/5187/)
 
-CNKI PDF+RIS download assistant script, can directly download RIS files and import them into EndNote with one click, recommended using https://chn.oversea.cnki.net/.
+油猴知网PDF+RIS下载助手，可以直接下载RIS文件，一键导入EndNote，拒绝知网垃圾*txt*导入方案！
 
-# Donate
-If this script helps you, you can support me with a coffee.
+# Others
+个人开发者，不定期更新。
 
-![](https://blog.cuger.cn/images/pay.jpg)
+如果你觉得本插件有幸帮助了你，可以扫描下方二维码捐赠，请作者喝一杯咖啡~
 
-## Donate records
-
+## 捐赠记录
 | ID   | AMOUNT |
 | ---- | ------ |
 | *达  | ￥10   |
@@ -32,7 +31,8 @@ If this script helps you, you can support me with a coffee.
 | F*g | ￥ 10 |
 | J*y | ￥ 15 |
 
-# Others
-Independent developer, updated occasionally.
+![](https://blog.cuger.cn/images/pay.jpg)
 
+
+# Author
 Dorad, cug.xia@gmail.com

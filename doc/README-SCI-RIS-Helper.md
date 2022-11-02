@@ -1,7 +1,7 @@
 # SCI RIS Helper - EndNote+Scihub
 [![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/dynamic/json?color=red&label=total%20installs&query=total_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&style=flat&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/dynamic/json?color=green&label=daily%20installs&query=daily_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/blog-%40Dorad-blue)](https://blog.cuger.cn)
 
-This script is written to find the pdf link to the article when the Refman file is downloaded. The pdf file will then be automatically downloaded and associated with the reference when being imported into EndNote.
+This script is written to find the pdf link to the article when the Refman file is downloaded. The pdf file will then be automatically downloaded and associated with the reference when being imported into EndNote. 
 
 This script can download the Refman(*.ris) with pdf URL queried from Sci-hub. 
 
@@ -17,7 +17,7 @@ This script will generate a floating button in the button right corner of the pa
 - **Only RIS**: **RIS** is available, **PDF** is unavailable, click the button to download the **RIS** file, but **PDF URL** can't be attached automatically. 
 - **NONE**: if both **RIS** and **PDF** are unavailable, the button is disabled. 
 
-![Button Status](./images/Button%20in%203%20states.png)
+![Button Status](https://github.com/Doradx/CNKI-PDF-RIS-Helper/raw/master/images/Button%20in%203%20states.png)
 
 # Runtime
 
@@ -32,7 +32,8 @@ If you have any issues or questions on this script, please visit [Github Issues]
 
 # Notice
 When you use this script, we will collect the DOI, RIS, and PDF URLs of articles anonymously, which should be known before using it. 
-There is no way to turn this off for now, so if you mind, please do not use this script.
+You can only turn it off by removing the relevant code.
+If you mind, please do not use this script.
 
 # Based on
 - https://citation.crosscite.org/docs.html

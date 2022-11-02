@@ -1,7 +1,7 @@
 # SCI RIS Helper - EndNote+Sci-hub强强联合一键下载导入论文
 [![](https://img.shields.io/badge/dynamic/json?color=green&label=version&query=version&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/dynamic/json?color=red&label=total%20installs&query=total_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&style=flat&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/dynamic/json?color=green&label=daily%20installs&query=daily_installs&url=https%3A%2F%2Fgreasyfork.org%2Fscripts%2F434310.json&logo=tampermonkey)](https://greasyfork.org/en/scripts/434310) [![](https://img.shields.io/badge/blog-%40Dorad-blue)](https://blog.cuger.cn)
 
-[Introduction - English](./README-SCI-RIS-Helper.md)
+[Introduction - English](https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/doc/README-SCI-RIS-Helper.md)
 
 一键下载带论文PDF链接的Refman(*.ris)文件，快速导入EndNote并自动下载关联PDF文件，已适配WOS、Researchgate、Springer、ScienceDirect、Scopus和MDPI等80+种网站。
 
@@ -23,7 +23,7 @@
 - **RIS**: 找到了**Refman**，但未找到**PDF**，点击**RIS**将下载RIS文件，双击即可导入EndNote，但是不会关联PDF。
 - **NONE**: 啥也没找到，不支持该页面，按钮禁用。
 
-![三种不同状态](./images/Button%20in%203%20states.png)
+![三种不同状态](https://github.com/Doradx/CNKI-PDF-RIS-Helper/raw/master/images/Button%20in%203%20states.png)
 
 如果在期刊页面未显示图标，则表明暂未适配该期刊。可将网址提交在**评论区**，博主空闲时随缘更新。
 
@@ -67,13 +67,13 @@ EndNote博主使用的X9.3.3版本，完美使用！
 Citavi 6 测试结果表明，在导入过程中，其不会自动下载，但是会保存论文PDF链接。
 
 预览窗口"Always preview this location immediately"将会自动下载预览，点击"Save a copy in this project"将在本地存储备份。
-![Citavi 6 导入结果](./images/Citavi%206.png)
+![Citavi 6 导入结果](https://raw.githubusercontent.com/Doradx/CNKI-PDF-RIS-Helper/master/images/Citavi%206.png)
 
 ## 3. NoteExpress
 
 经测（NoteExpress），可以成功导入，并导入PDF链接，但是不会自动下载PDF, 需要点击链接自行下载。
 
-![NoteExpress导入情况](./images/NoteExpress.png)
+![NoteExpress导入情况](https://raw.githubusercontent.com/Doradx/CNKI-PDF-RIS-Helper/master/images/NoteExpress.png)
 
 # 四、其它
 
