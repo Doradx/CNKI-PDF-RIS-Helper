@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.11.6
+// @version      0.12.0
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -61,7 +61,6 @@
 // @match        *://www.tandfonline.com/doi/*
 // @match        *://www.beilstein-journals.org/*
 // @match        *://www.eurekaselect.com/*/article*
-// @match        *://pubs.rsc.org/en/Content/*
 // @match        *://*.springer.com/article*
 // @match        *://*.springer.com/chapter/*
 // @match        *://*.springeropen.com/article*
@@ -129,9 +128,11 @@
 // @match        *://www.ijcai.org/proceedings/*
 // @match        *://www.scopus.com/record/display.uri*
 // @match        *://avs.scitation.org/doi/*
-// @match        *://pubs.rsc.org/*/content/article*
+// @match        *://pubs.rsc.org/*/content/*
 // @match        *://*.copernicus.org/articles/*
 // @include      /^http[s]?:\/\/[\S\s]*onepetro.org/[\S\s]+/(article|proceedings)/
+// @match        *://europepmc.org/article/*
+// @match        *://www.futuremedicine.com/doi/*
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -384,7 +385,8 @@ function getMeta() {
 // get ris from different site
 function getRisFromOriginSite(metas) {
     // remove useless pdf url
-    if (!metas.hasOwnProperty('pdf') || !metas.pdf || metas.pdf.indexOf('.pdf') < 0)
+    // if (!metas.hasOwnProperty('pdf') || !metas.pdf || metas.pdf.indexOf('.pdf') < 0)
+    if (!metas.hasOwnProperty('pdf') || !metas.pdf)
         delete metas.pdf;
     let risPromise = metas.risPromise;
     let pdfPromise = metas.pdfPromise;
@@ -425,10 +427,10 @@ function getRisFromOriginSite(metas) {
                 console.log('updated metas', metas);
                 // ris = ris.replace(/(?!\n)(AU|TI)  - /ig, "\n$1  - ");
                 // formate ris
-                const regstr = "(?!\\n)("+__getRisKeys(ris).join('|')+")[ ]{1,3}- ";
+                const regstr = "(?!\\n)(" + __getRisKeys(ris).join('|') + ")[ ]{1,3}- ";
                 console.log(regstr)
-                ris = ris.replace(new RegExp(regstr,'ig'), "\n$1  - ");
-                ris = ris.replace(/(\n){2,}/ig,'\n');
+                ris = ris.replace(new RegExp(regstr, 'ig'), "\n$1  - ");
+                ris = ris.replace(/(\n){2,}/ig, '\n');
                 // update abstract
                 if (ris && ris.indexOf('N2  - ') < 0 && ris.indexOf('AB  - ') < 0 && metas.hasOwnProperty('abstract') && metas.abstract.length) {
                     ris = __setKeyForRis(ris, 'N2', metas.abstract)
@@ -437,6 +439,12 @@ function getRisFromOriginSite(metas) {
                 if (ris && ris.indexOf('L1  - ') < 0 && metas.hasOwnProperty('pdf') && metas.pdf !== undefined && metas.pdf.length) {
                     // ris = __setKeyForRis(ris, 'L1', metas.pdf.replace(/(\?|#)[^'"]*/, ''))
                     ris = __setKeyForRis(ris, 'L1', metas.pdf)
+                }
+                // add additional property from metas.addPropertyList
+                if (metas.hasOwnProperty('addPropertyList')) {
+                    metas.addPropertyList.forEach(e => {
+                        ris = __setKeyForRis(ris, e.key, e.value)
+                    });
                 }
                 ris = __setKeyForRis(ris, 'DO', metas.doi)
                 // push update to cuger.cn
@@ -678,7 +686,8 @@ function journalMetasAdaptor() {
             return new Promise((resolve, reject) => {
                 reject("No pdf from origin site.")
             })
-        }
+        },
+        addPropertyList: []
     };
     /**
      * all the non standard journal
@@ -870,6 +879,10 @@ function journalMetasAdaptor() {
                 metas.doi = $('#FullRTa-DOI').text();
                 metas.abstract = $('#FullRTa-abstract-basic p').text();
                 metas.title = $('#FullRTa-fullRecordtitle-0').text();
+                metas.addPropertyList.push({
+                    key: "AN",
+                    value: $('#HiddenSecTa-accessionNo').text()
+                })
                 break;
             case 'asmedigitalcollection.asme.org':
                 metas.abstract = $('section.abstract p').text();
@@ -900,7 +913,7 @@ function journalMetasAdaptor() {
                         if (ris.match(/<html>[\s\S]*<\/html>/))
                             reject('Error format');
                         // ris += '\r\nER  - ';
-                        ris = ris.replace(/(AU|TI)  -/ig,'\n$1  -');
+                        ris = ris.replace(/(AU|TI)  -/ig, '\n$1  -');
                         //console.log(ris);
                         resolve(ris);
                     })
@@ -1001,6 +1014,24 @@ function journalMetasAdaptor() {
                 break;
             case 'avs.scitation.org':
                 metas.abstract = $('meta[name="citation_abstract"]').attr("content");
+                break;
+            case 'pubs.rsc.org':
+                metas.doi = $('meta[name="DC.Identifier"]').attr("content");
+                metas.pid = metas.doi.toLowerCase().split('/')[1];
+                metas.risPromise = function (metas) {
+                    return __httpRequestPromise('https://pubs.rsc.org/en/content/getformatedresult/' + metas.pid + '?downloadtype=article', 'POST', {
+                        'ResultAbstractFormat': 'RefWorks',
+                        'go': 'Go',
+                    }, {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }, (resolve, reject, res) => {
+                        // console.log(res)
+                        let ris = res.responseText;
+                        if (ris.match(/<html>[\s\S]*<\/html>/))
+                            reject('Error format');
+                        resolve(ris);
+                    })
+                }
                 break;
             default:
         }
