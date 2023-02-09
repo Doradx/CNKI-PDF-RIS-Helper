@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn/p/5187/
-// @version      0.7.1
+// @version      0.7.2
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
@@ -22,7 +22,7 @@
 (async function () {
     console.log('CNKI PDF RIS Helper --- Dorad, cug.xia@gmail.com');
     var site = window.location.href.toString().toLowerCase();
-    if (site.indexOf('kcms/detail') != -1) {
+    if (site.indexOf('kcms/detail') != -1 || site.indexOf('kcms2/article') != -1) {
         // 详情页
         var butttonBoxs = document.getElementsByClassName('operate-btn');
         /*
@@ -40,7 +40,7 @@
             fileId: document.getElementById('paramfilename').value,
             title: document.getElementsByClassName('wx-tit')[0].children[0].text,
         }
-        if((['CDFD', 'CMFD'].indexOf(dbCode) < 0 || document.domain.indexOf('oversea')>-1) && pdf!==null){
+        if ((['CDFD', 'CMFD'].indexOf(dbCode) < 0 || document.domain.indexOf('oversea') > -1) && pdf !== null) {
             paper.pdf = pdf;
         }
 
@@ -85,7 +85,7 @@
         console.log(['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf'));
         if (['CDFD', 'CMFD'].indexOf(dbCode) > -1 && paper.hasOwnProperty('pdf') && document.domain.indexOf('oversea') == -1) {
             var pdfDownloadBtn = risExportBtn.cloneNode(true)
-            const pdfUrl = paper.pdf.indexOf('http')>-1? paper.pdf:"https://" + document.domain + paper.pdf;
+            const pdfUrl = paper.pdf.indexOf('http') > -1 ? paper.pdf : "https://" + document.domain + paper.pdf;
             pdfDownloadBtn.innerHTML = "<a href=" + pdfUrl + " target='_blank'><i></i>PDF下载</a>";
             // pdfDownloadBtn.setAttribute("href", "https://"+document.domain+paper.pdf);
             butttonBoxs[0].append(pdfDownloadBtn);
