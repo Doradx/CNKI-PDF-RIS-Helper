@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.12.0
+// @version      0.12.1
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -42,7 +42,6 @@
 // @connect      serve.mdpi.com
 // @connect      ieeexplore.ieee.org
 // @connect      fjfsdata01prod.blob.core.windows.net
-// @include      /^http[s]?:\/\/[\S\s]+webofscience[\S\s]+$/
 // @match        *://www.astm.org/*
 // @match        *://www.scirp.org/journal/*
 // @match        *://direct.mit.edu/neco/*
@@ -61,8 +60,6 @@
 // @match        *://www.tandfonline.com/doi/*
 // @match        *://www.beilstein-journals.org/*
 // @match        *://www.eurekaselect.com/*/article*
-// @match        *://*.springer.com/article*
-// @match        *://*.springer.com/chapter/*
 // @match        *://*.springeropen.com/article*
 // @match        *://aip.scitation.org/doi/*
 // @match        *://www.nature.com/articles*
@@ -130,9 +127,12 @@
 // @match        *://avs.scitation.org/doi/*
 // @match        *://pubs.rsc.org/*/content/*
 // @match        *://*.copernicus.org/articles/*
-// @include      /^http[s]?:\/\/[\S\s]*onepetro.org/[\S\s]+/(article|proceedings)/
 // @match        *://europepmc.org/article/*
 // @match        *://www.futuremedicine.com/doi/*
+
+// @include      /^http[s]?:\/\/[\S\s]+webofscience[\S\s]+$/
+// @include      /^http[s]?:\/\/[\S\s]*springer[\S\s]*/(article|chapter)/
+// @include      /^http[s]?:\/\/[\S\s]*onepetro.org/[\S\s]+/(article|proceedings)/
 // ==/UserScript==
 
 // jQuery.noConflict(true);
@@ -697,6 +697,9 @@ function journalMetasAdaptor() {
         // host translate
         if (host.indexOf('webofscience') > -1) {
             host = 'www.webofscience.com';
+        }
+        if (host.indexOf('springer') > -1){
+            host = 'link.springer.com';
         }
         console.log(host);
         switch (host) {
