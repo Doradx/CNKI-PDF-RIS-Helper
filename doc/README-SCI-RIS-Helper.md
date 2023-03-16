@@ -49,6 +49,7 @@ If this script helps you, you can support me with a coffee.
 ![](https://blog.cuger.cn/images/pay.jpg)
 
 ## Donate records
+
 | ID   | AMOUNT |
 | ---- | ------ |
 | *达  | ￥10   |
@@ -57,6 +58,8 @@ If this script helps you, you can support me with a coffee.
 | 西*D | ￥ 10   |
 | F*g | ￥ 10 |
 | J*y | ￥ 15 |
+| 1*4 | ￥ 5 |
+| P*a | ￥ 5 |
 
 # Author
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com

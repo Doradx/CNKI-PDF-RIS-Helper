@@ -1,3 +1,4 @@
+
 [![](https://img.shields.io/github/stars/Doradx/CNKI-PDF-RIS-Helper?logo=github)](https://github.com/Doradx/CNKI-PDF-RIS-Helper/stargazers) [![](https://img.shields.io/github/forks/Doradx/CNKI-PDF-RIS-Helper?logo=github)](https://github.com/Doradx/CNKI-PDF-RIS-Helper/network) [![](https://img.shields.io/github/last-commit/Doradx/CNKI-PDF-RIS-Helper?logo=github)](https://github.com/Doradx/CNKI-PDF-RIS-Helper/commits) [![](https://img.shields.io/badge/blog-%40Dorad-blue)](http://blog.cuger.cn)
 
 [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=views&color=blue&query=%24.data.stat.view)](https://www.bilibili.com/video/BV1Sv411u7fv) [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=coins&color=red&query=%24.data.stat.coin)](https://www.bilibili.com/video/BV1Sv411u7fv) [![](https://img.shields.io/badge/dynamic/json?url=http%3A%2F%2Fapi.bilibili.com%2Fx%2Fweb-interface%2Fview%3Faid%3D251340943&logo=bilibili&label=favorites&color=brightgreen&query=%24.data.stat.favorite)](https://www.bilibili.com/video/BV1Sv411u7fv)
@@ -22,6 +23,7 @@
 如果你觉得本插件有幸帮助了你，可以扫描下方二维码捐赠，请作者喝一杯咖啡~
 
 ## 捐赠记录
+
 | ID   | AMOUNT |
 | ---- | ------ |
 | *达  | ￥10   |
@@ -30,6 +32,8 @@
 | 西*D | ￥ 10   |
 | F*g | ￥ 10 |
 | J*y | ￥ 15 |
+| 1*4 | ￥ 5 |
+| P*a | ￥ 5 |
 
 ![](https://blog.cuger.cn/images/pay.jpg)
 

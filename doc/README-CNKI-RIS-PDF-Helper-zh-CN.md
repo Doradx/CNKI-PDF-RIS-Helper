@@ -21,6 +21,7 @@ https://chn.oversea.cnki.net/
 2. 测试结果表明，当摘要字数过多时，导入EndNote中会导致摘要乱码，在导入硕博论文时需要注意。测试软件为EndNote X9.3.3 on Windows 10。
 
 # 捐赠记录
+
 | ID   | AMOUNT |
 | ---- | ------ |
 | *达  | ￥10   |
@@ -29,6 +30,8 @@ https://chn.oversea.cnki.net/
 | 西*D | ￥ 10   |
 | F*g | ￥ 10 |
 | J*y | ￥ 15 |
+| 1*4 | ￥ 5 |
+| P*a | ￥ 5 |
 
 # 作者
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com
