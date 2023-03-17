@@ -32,6 +32,7 @@ https://chn.oversea.cnki.net/
 | J*y | ￥ 15 |
 | 1*4 | ￥ 5 |
 | P*a | ￥ 5 |
+| *. | ￥ 5 |
 
 # 作者
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com

@@ -34,6 +34,7 @@
 | J*y | ￥ 15 |
 | 1*4 | ￥ 5 |
 | P*a | ￥ 5 |
+| *. | ￥ 5 |
 
 ![](https://blog.cuger.cn/images/pay.jpg)
 

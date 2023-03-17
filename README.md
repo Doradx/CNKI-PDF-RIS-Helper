@@ -34,6 +34,7 @@ If this script helps you, you can support me with a coffee.
 | J*y | ￥ 15 |
 | 1*4 | ￥ 5 |
 | P*a | ￥ 5 |
+| *. | ￥ 5 |
 
 # Others
 Independent developer, updated occasionally.
