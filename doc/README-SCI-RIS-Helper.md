@@ -50,17 +50,17 @@ If this script helps you, you can support me with a coffee.
 
 ## Donate records
 
-| ID   | AMOUNT |
-| ---- | ------ |
-| *达  | ￥10   |
-| Z*l | ￥ 5   |
-| a*s | ￥ 10   |
-| 西*D | ￥ 10   |
-| F*g | ￥ 10 |
-| J*y | ￥ 15 |
-| 1*4 | ￥ 5 |
-| P*a | ￥ 5 |
-| *. | ￥ 5 |
+| ID   | AMOUNT | DATE |
+| ---- | ------ | ------ |
+| *达  | ￥10   |    |
+| Z*l | ￥ 5   |    |
+| a*s | ￥ 10   |    |
+| 西*D | ￥ 10   | 2022-05-25 |
+| F*g | ￥ 10 | 2022-06-13 |
+| J*y | ￥ 15 | 2022-09-30 |
+| 1*4 | ￥ 5 | 2023-03-13 |
+| P*a | ￥ 5 | 2023-03-16 |
+| *. | ￥ 5 | 2023-03-17 |
 
 # Author
 [Dorad](https://blog.cuger.cn), cug.xia@gmail.com
