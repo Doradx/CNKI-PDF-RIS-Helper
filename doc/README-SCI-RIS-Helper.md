@@ -63,4 +63,4 @@ If this script helps you, you can support me with a coffee.
 | *. | ￥ 5 | 2023-03-17 |
 
 # Author
-[Dorad](https://blog.cuger.cn), cug.xia@gmail.com
+[Dorad](https://blog.cuger.cn), ddxid@outlook.com
