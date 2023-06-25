@@ -39,4 +39,4 @@ If this script helps you, you can support me with a coffee.
 # Others
 Independent developer, updated occasionally.
 
-Dorad, cug.xia@gmail.com
+Dorad, ddxid@outlook.com
