@@ -40,4 +40,4 @@
 
 
 # Author
-Dorad, cug.xia@gmail.com
+Dorad, ddxid@outlook.com
