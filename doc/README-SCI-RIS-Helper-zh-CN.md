@@ -129,4 +129,4 @@ Citavi 6 测试结果表明，在导入过程中，其不会自动下载，但�
 ![](https://blog.cuger.cn/images/pay.jpg)
 
 # 作者
-[Dorad](https://blog.cuger.cn), cug.xia@gmail.com
+[Dorad](https://blog.cuger.cn), ddxid@outlook.com

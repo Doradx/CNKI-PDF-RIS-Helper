@@ -35,4 +35,4 @@ https://chn.oversea.cnki.net/
 | *. | ￥ 5 | 2023-03-17 |
 
 # 作者
-[Dorad](https://blog.cuger.cn), cug.xia@gmail.com
+[Dorad](https://blog.cuger.cn), ddxid@outlook.com
