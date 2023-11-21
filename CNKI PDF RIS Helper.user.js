@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn/p/5187/
-// @version      0.7.2
+// @version      0.7.3
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
@@ -271,22 +271,21 @@ function downloadByFilename(fileId, dbName, name, type = 'EndNote', pdfUrl = und
     getCount('CNKI-PDF-RIS-Helper');
     GM_xmlhttpRequest({
         method: "POST",
-        url: "https://kns.cnki.net/KNS8/manage/ShowExport",
-        data: "filename=" + fileId + "&displaymode=" + type + "&orderparam=0&ordertype=desc&selectfield=&dbname=" + dbName + "&random=" + Math.random(),
+        url: "https://kns.cnki.net/dm/API/GetExport?uniplatform=NZKPT",
+        data: "filename=" + dbName + "!" + fileId + "!1!0" + "&displaymode=" + type,
+        anonymous: true,
         headers: {
-            'Connection': 'keep-alive',
-            'Accept': 'text/plain, */*; q=0.01',
-            'X-Requested-With': 'XMLHttpRequest',
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Origin': 'https://kns.cnki.net',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-Mode': 'cors'
+            'Referer': window.location.href
         },
         onload: function (res) {
+            console.log(res);
             if (res.status == 200) {
-                var text = res.responseText;
-                // console.log(text);
+                var res_json = JSON.parse(res.responseText);
+                console.log(res_json);
+                var text = res_json?.data?.[0]['value'][0];
+                console.log(text);
                 var a = document.createElement('a');
                 text = text.replaceAll('<br>', '\r\n');
                 text = text.replace(/<[^>\u4e00-\u9fa5]+>/g, "");
