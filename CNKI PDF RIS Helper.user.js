@@ -289,6 +289,8 @@ function downloadByFilename(fileId, dbName, name, type = 'EndNote', pdfUrl = und
                 var a = document.createElement('a');
                 text = text.replaceAll('<br>', '\r\n');
                 text = text.replace(/<[^>\u4e00-\u9fa5]+>/g, "");
+                // %A如果前面不是换行符，则添加换行
+                text = text.replace(/(?<!\r\n)%A/g, "\r\n%A");
                 // console.log(text);
                 // add PDF URL if exist
                 if (pdfUrl !== undefined) {
