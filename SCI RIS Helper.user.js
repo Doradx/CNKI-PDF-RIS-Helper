@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.12.1
+// @version      0.12.2
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -219,7 +219,7 @@ function start() {
     }, 200);
 }
 
-function generateTheButton(ris) {
+function generateTheButton(ris, metas) {
     clearAll();
     const year = new Date().getFullYear();
     let sheet = $(`
@@ -263,7 +263,8 @@ function generateTheButton(ris) {
     } else {
         // PDF
         const pdf = __getKeyFromRis(ris, 'L1');
-        if (pdf !== undefined) {
+        // check if pdf is valid and pdf is end with .pdf
+        if (pdf !== undefined && pdf !== '') {
             $("#pdfDownload").attr("href", pdf);
             key = 'SCI-RIS-Helper_PDF';
         } else {
@@ -416,7 +417,7 @@ function getRisFromOriginSite(metas) {
                         }
                     }
                 }
-                // PDF url
+                // PDF url is valid
                 if (res[3].status == 'fulfilled' && res[3].value !== undefined) {
                     metas.pdf = res[3].value;
                 }
@@ -799,6 +800,13 @@ function journalMetasAdaptor() {
                         if (ris.match(/<html>[\s\S]*<\/html>/))
                             reject('Error format');
                         resolve(ris);
+                    })
+                }
+                // failed to load PDF url for wiley due to its anti-crawler policy
+                metas.pdfPromise = function (metas) {
+                    // const url = "https://onlinelibrary.wiley.com/doi/pdfdirect/" + metas.doi + "?download=true";
+                    return new Promise((resolve, reject) => {
+                        resolve("")
                     })
                 }
                 break;
