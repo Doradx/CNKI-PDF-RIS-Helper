@@ -36,6 +36,11 @@ If this script helps you, you can support me with a coffee.
 | P*a | ￥ 5 | 2023-03-16 |
 | *. | ￥ 5 | 2023-03-17 |
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Doradx/CNKI-PDF-RIS-Helper&type=Date)](https://star-history.com/#Doradx/CNKI-PDF-RIS-Helper&Date)
+
+
 # Others
 Independent developer, updated occasionally.
 
