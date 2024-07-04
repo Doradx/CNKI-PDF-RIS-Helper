@@ -61,6 +61,7 @@ If this script helps you, you can support me with a coffee.
 | 1*4 | ￥ 5 | 2023-03-13 |
 | P*a | ￥ 5 | 2023-03-16 |
 | *. | ￥ 5 | 2023-03-17 |
+| R*d | ￥ 5 | 2024-07-04 |
 
 # Author
 [Dorad](https://blog.cuger.cn), ddxid@outlook.com
