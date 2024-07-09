@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.12.2
+// @version      0.12.3
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -133,14 +133,18 @@
 // @include      /^http[s]?:\/\/[\S\s]+webofscience[\S\s]+$/
 // @include      /^http[s]?:\/\/[\S\s]*springer[\S\s]*/(article|chapter)/
 // @include      /^http[s]?:\/\/[\S\s]*onepetro.org/[\S\s]+/(article|proceedings)/
+// @downloadURL https://update.greasyfork.org/scripts/434310/SCI%20RIS%20Helper%20-%20EndNote%2BScihub.user.js
+// @updateURL https://update.greasyfork.org/scripts/434310/SCI%20RIS%20Helper%20-%20EndNote%2BScihub.meta.js
 // ==/UserScript==
 
 // jQuery.noConflict(true);
 // var $ = unsafeWindow.jQuery;
 
 const SCI_HUB_HOST = [
+    'https://www.sci-hub.wf/',
+    'https://www.sci-hub.ee/',
+    'https://www.sci-hub.ren/',
     'https://sci-hub.se/',
-    //'https://sci-hub.st/',
     'https://sci-hub.ru/',
 ];
 
