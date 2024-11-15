@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.12.3
+// @version      0.12.4
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -130,7 +130,7 @@
 // @match        *://europepmc.org/article/*
 // @match        *://www.futuremedicine.com/doi/*
 
-// @include      /^http[s]?:\/\/[\S\s]+webofscience[\S\s]+$/
+// @include      /^http[s]?:\/\/[\S\s]*webofscience[\S\s]+$/
 // @include      /^http[s]?:\/\/[\S\s]*springer[\S\s]*/(article|chapter)/
 // @include      /^http[s]?:\/\/[\S\s]*onepetro.org/[\S\s]+/(article|proceedings)/
 // @downloadURL https://update.greasyfork.org/scripts/434310/SCI%20RIS%20Helper%20-%20EndNote%2BScihub.user.js
