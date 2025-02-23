@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         CNKI PDF RIS Helper
 // @namespace    https://blog.cuger.cn/p/5187/
-// @version      0.7.4
+// @version      0.7.5
 // @description  1.支持在论文详情页直接导出RIS, 一键导入Endnote! 参考:https://blog.cuger.cn/p/5187/
 // @author       Dorad
 // @license      MIT License
@@ -32,13 +32,13 @@
         const fileId = document.getElementById('paramfilename').value;
         const dbCode = document.getElementById('paramdbcode').value;
         const dbName = document.getElementById('paramdbname').value;
-        const title = document.getElementsByClassName('wx-tit')[0].children[0].text;
+        const title = document.getElementsByClassName('wx-tit')[0].children[0].innerText;
         var pdf = document.getElementById('pdfDown') ? document.getElementById('pdfDown').href : null;
         var paper = {
             dbName: document.getElementById('paramdbname').value,
             dbCode: document.getElementById('paramdbcode').value,
             fileId: document.getElementById('paramfilename').value,
-            title: document.getElementsByClassName('wx-tit')[0].children[0].text,
+            title: document.getElementsByClassName('wx-tit')[0].children[0].innerText,
         }
         if ((['CDFD', 'CMFD'].indexOf(dbCode) < 0 || document.domain.indexOf('oversea') > -1) && pdf !== null) {
             paper.pdf = pdf;
@@ -266,43 +266,47 @@ function downloadRisOfPaper(paper) {
     }
 }
 
+
 // type can be EndNote or Refworks
 function downloadByFilename(fileId, dbName, name, type = 'EndNote', pdfUrl = undefined) {
     getCount('CNKI-PDF-RIS-Helper');
     GM_xmlhttpRequest({
         method: "POST",
-        url: "https://kns.cnki.net/dm/API/GetExport?uniplatform=NZKPT",
-        data: "filename=" + dbName + "!" + fileId + "!1!0" + "&displaymode=" + type,
+        url: "https://kns.cnki.net/dm8/api/ShowExport",
+        data: "FileName=" + dbName + "!" + fileId + "!1!0" + "&DisplayMode=" + type + "&OrderParam=0&OrderType=desc&SelectField=&PageIndex=1&PageSize=20&language=&uniplatform=NZKPT&subject=&random=" + Math.random(),
         anonymous: true,
         headers: {
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36',
-            'Referer': window.location.href
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0',
+            'Referer': window.location.href,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'text/plain, */*; q=0.01',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
         },
         onload: function (res) {
             console.log(res);
             if (res.status == 200) {
-                var res_json = JSON.parse(res.responseText);
-                console.log(res_json);
-                var text = res_json?.data?.[0]['value'][0];
+                // 从HTML中提取纯文本, 匹配 <li></li>标签中的内容
+                const ris_text_reg = /<li>(.*?)<\/li>/g;
+                // 提取文本，只要()内的，不要<li></li>, 其中将<br>替换为\r\n
+                var text = res.responseText.match(ris_text_reg).map((v) => {
+                    return v.replace(/<br>/g, "\r\n").replace(/<[^>]+>/g, "");
+                }).join('\r\n');
+                // 删除每行前后的空格, 并删除空行
+                text = text.split('\n').map(line => line.trim()).filter(line => line !== '').join('\n');
                 console.log(text);
                 var a = document.createElement('a');
-                text = text.replaceAll('<br>', '\r\n');
+                // text = text.replaceAll('<br>', '\r\n');
                 text = text.replace(/<[^>\u4e00-\u9fa5]+>/g, "");
-                // %A如果前面不是换行符，则添加换行
                 text = text.replace(/(?<!\r\n)%A/g, "\r\n%A");
-                // console.log(text);
-                // add PDF URL if exist
                 if (pdfUrl !== undefined) {
                     text += "%> " + pdfUrl;
                 }
                 console.log(text);
                 a.href = 'data:application/x-EndNote-tagged; charset=utf-8,' + encodeURIComponent(text);
-                //supported by chrome 14+ and firefox 20+
                 a.download = name + '.ris';
-                //needed for firefox
                 document.getElementsByTagName('body')[0].appendChild(a);
-                //supported by chrome 20+ and firefox 5+
                 a.click();
             }
         }
