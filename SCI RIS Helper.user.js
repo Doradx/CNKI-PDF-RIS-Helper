@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.12.4
+// @version      0.12.5
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -29,13 +29,8 @@
 // @connect      sci-hub.tf
 // @connect      sci-hub.st
 // @connect      sci-hub.ru
-// @connect      sci-hub.ren
-// @connect      sci.hubg.org
-// @connect      sci-hub.hkvisa.net
-// @connect      sci-hub.shop
-// @connect      sci-hub.mksa.top
-// @connect      sci-hub.wf
-// @connect      sci-hub.yncjkj.com
+// @connect      sci-hub.red
+// @connect      sci.hub.box
 // @connect      data.crosscite.org
 // @connect      mdpi.com
 // @connect      mdpi-res.com
@@ -141,11 +136,11 @@
 // var $ = unsafeWindow.jQuery;
 
 const SCI_HUB_HOST = [
-    'https://www.sci-hub.wf/',
-    'https://www.sci-hub.ee/',
-    'https://www.sci-hub.ren/',
     'https://sci-hub.se/',
+    'https://sci-hub.st/',
     'https://sci-hub.ru/',
+    'https://sci-hub.red/',
+    'https://sci-hub.box/',
 ];
 
 let bestScihubHost = SCI_HUB_HOST[0];
