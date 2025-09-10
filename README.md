@@ -36,6 +36,7 @@ If this script helps you, you can support me with a coffee.
 | P*a | ￥ 5 | 2023-03-16 |
 | *. | ￥ 5 | 2023-03-17 |
 | R*d | ￥ 5 | 2024-07-04 |
+| **坤 | ￥ 5 | 2025-09-04 |
 
 ## Star History
 
