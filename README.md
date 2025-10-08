@@ -40,7 +40,7 @@ If this script helps you, you can support me with a coffee.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Doradx/CNKI-PDF-RIS-Helper&type=Date)](https://star-history.com/#Doradx/CNKI-PDF-RIS-Helper&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=Doradx/CNKI-PDF-RIS-Helper&type=Date)](https://www.star-history.com/#Doradx/CNKI-PDF-RIS-Helper&Date)
 
 
 # Others
