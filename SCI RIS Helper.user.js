@@ -12,7 +12,7 @@
 // @namespace    https://github.com/Doradx/CNKI-PDF-RIS-Helper/blob/master/SCI%20RIS%20Helper.user.js
 // @homepage     https://greasyfork.org/zh-CN/scripts/434310-sci-ris-helper
 // @supportURL   https://blog.cuger.cn/p/63499/
-// @version      0.12.5
+// @version      0.13.0
 // @author       Dorad
 // @license      MIT License
 // @grant        GM_xmlhttpRequest
@@ -141,6 +141,9 @@ const SCI_HUB_HOST = [
     'https://sci-hub.ru/',
     'https://sci-hub.red/',
     'https://sci-hub.box/',
+    'https://sci-hub.ren/',
+    'https://sci-hub.shop/',
+    'https://sci-hub.mksa.top/',
 ];
 
 let bestScihubHost = SCI_HUB_HOST[0];
@@ -349,10 +352,10 @@ function clearAll() {
 function getMeta() {
     let metas = journalMetasAdaptor();
     const metaDict = {
-        title: ["dc.title", "dc.Title", "DC.title", "citation_title", "wkhealth_title"],
-        doi: ["citation_doi", "dc.identifier", "dc.Identifier", "DC.identifier", "dc.Source"],
-        pdf: ["citation_pdf_url", "wkhealth_pdf_url"],
-        abstract: ["dc.description", "dc.Description", "og:description", "og:Description", "citation_abstract"]
+        title: ["dc.title", "dc.Title", "DC.title", "citation_title", "wkhealth_title", "og:title", "parsely-title"],
+        doi: ["citation_doi", "dc.identifier", "dc.Identifier", "DC.identifier", "dc.Source", "DOI", "doi", "prism.doi", "bepress_citation_doi"],
+        pdf: ["citation_pdf_url", "wkhealth_pdf_url", "citation_fulltext_html_url", "citation_fulltext_html_url"],
+        abstract: ["dc.description", "dc.Description", "og:description", "og:Description", "citation_abstract", "prism.abstract", "dcterms.abstract"]
     }
     // search for generic fields
     for (var key in metaDict) {
@@ -479,24 +482,30 @@ function __getPdfUrlFromScihub(doi) {
     return __httpRequestPromise(__getScihubHost() + doi, 'GET', {}, {}, (resolve, reject, res) => {
         if (res.status !== 200) {
             reject('Error to get the pdf url from sci-hub');
+            return;
         }
         let doc = new DOMParser().parseFromString(res.responseText, 'text/html');
-        let pdfDomTxt = doc.getElementById('article').innerHTML;
-        let src = /src="(\S+)#\S+"/.exec(pdfDomTxt);
+        let article = doc.getElementById('article');
+        if (!article) {
+            reject("Failed to find article element from sci-hub.");
+            return;
+        }
+        let pdfDomTxt = article.innerHTML;
+        let src = /src="([^"]+\.pdf[^"]*)"/.exec(pdfDomTxt) || /src="(\S+)#\S+"/.exec(pdfDomTxt);
         if (!src) {
-            reject("Failed to find pdf from sci-hub.")
+            reject("Failed to find pdf from sci-hub.");
+            return;
         }
         let pdfUrl = src[1];
         if (pdfUrl.startsWith('//')) {
             pdfUrl = "https:" + pdfUrl;
         } else if (pdfUrl.startsWith('/')) {
             pdfUrl = __getScihubHost() + pdfUrl.substring(1);
-        } else if (pdfUrl.startsWith('http')) {
-            pdfUrl = pdfUrl;
-        } else {
+        } else if (!pdfUrl.startsWith('http')) {
             reject('Error to get the pdf url from sci-hub');
+            return;
         }
-        // console.log(pdfUrl)
+        console.log('Found PDF URL from sci-hub:', pdfUrl);
         resolve(pdfUrl);
     })
 }
